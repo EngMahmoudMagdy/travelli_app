@@ -1,0 +1,51 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+    <style name="Base.Widget.Design.TabLayoutNew" parent="android:Widget" >
+        <item name="tabIndicatorColor">@color/grey</item>
+        <item name="tabTextColor">@color/grey</item>
+        <item name="tabSelectedTextColor">@android:color/white</item>
+    </style>
+    <style name="MyToolbar" parent="@style/ThemeOverlay.AppCompat">
+        <!-- Title text -->
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:background">@color/colorPrimary</item>
+        <!-- Title color in AppCompat.Light  -->
+        <item name="android:textColorPrimaryInverse">@android:color/white</item>
+
+        <!-- Menu text-->
+        <item name="actionMenuTextColor">@android:color/white</item>
+        <!-- Overflow -->
+        <item name="android:textColorSecondary">@android:color/white</item>
+        <!-- This will change drawer icon -->
+        <item name="drawerArrowStyle">@style/WhiteDrawerIconStyle</item>
+        <!-- background of the  -->
+        <!-- <item name="android:background">@color/color_primary</item> -->
+    </style>
+
+    <style name="WhiteDrawerIconStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="spinBars">true</item>
+        <item name="color">@android:color/white</item>
+    </style>
+    <style name="MaterialSearch" parent="@android:style/Theme.Dialog">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.7</item>
+    </style>
+
+    <style name="RatingBar" parent="Theme.AppCompat">
+        <item name="colorControlActivated">@color/yellow</item>
+        <item name="colorControlNormal">@color/duskYellow</item>
+    </style>
+
+
+</resources>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#2196F3</color>
+    <color name="colorPrimaryDark">#1565C0</color>
+    <color name="colorAccent">#90a4ae</color>
+    <color name="textColorPrimary">#FFFFFF</color>
+    <color name="grey">#D0D0D0</color>
+    <color name="light_grey">#d7d7d7</color>
+    <color name="skelton_back">#EEEEEE</color>
+    <color name="skelton_highlight">#DEDEDE</color>
+    <color name="dividerColor">#EAEAEA</color>
+    <color name="textColorSecondary">#969494</color>
+    <color name="primary_text">#000</color>
+    <color name="secondary_text">#727272</color>
+    <color name="chrome_grey">#F2F2F2</color>
+    <color name="trans_black_25">#40000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="transparent">#00000000</color>
+    <color name="bg_light">#FAFAFA</color>
+    <color name="amber_50">#FFF8E1</color>
+    <color name="primary_500">#3F51B5</color>
+    <color name="red">#f00</color>
+    <color name="gray">#444</color>
+    <color name="yellow">#ffea00</color>
+    <color name="duskYellow">#ffc400</color>
+    <color name="circleProgressCompleteStartGradient">@color/colorPrimary</color>
+    <color name="circleProgressCompleteEndGradient">@color/colorPrimaryDark</color>
+</resources>
