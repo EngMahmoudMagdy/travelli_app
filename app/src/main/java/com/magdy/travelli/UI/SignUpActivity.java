@@ -24,27 +24,35 @@ public class SignUpActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
-        final EditText etusername=findViewById(R.id.name);
+        final EditText etusername = findViewById(R.id.name);
         final EditText etemail = findViewById(R.id.email);
         final EditText etphone = findViewById(R.id.phone);
-        final EditText etpassword =findViewById(R.id.pass);
-        final EditText etconfirm =findViewById(R.id.conf_pass);
+        final EditText etpassword = findViewById(R.id.pass);
+        final EditText etconfirm = findViewById(R.id.conf_pass);
 
-        final Button bsignup=findViewById(R.id.register);
+        final Button bsignup = findViewById(R.id.register);
         bsignup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 final String name = etusername.getText().toString();
-                final String email= etemail.getText().toString();
-                final String phone= etphone.getText().toString();
+                final String email = etemail.getText().toString();
+                final String phone = etphone.getText().toString();
                 final String password = etpassword.getText().toString();
                 final String confirm = etconfirm.getText().toString();
-                if(name.equals("")||email.equals("")||password.equals("")||confirm.equals("")){
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getBaseContext());
-                    builder.setMessage("please fill the required data").setNegativeButton("Retry", null).create().show();
-                }else if(!password.equals(confirm)){
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getBaseContext());
+                if (name.equals("") || email.equals("") || password.equals("") || confirm.equals("")) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(SignUpActivity.this);
+                    builder.setMessage("please fill the required data");
+                    builder.setNegativeButton("Retry", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                } else if (!password.equals(confirm)) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(SignUpActivity.this);
                     builder.setMessage("your passwords doesnot match").setNegativeButton("Retry", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -55,7 +63,7 @@ public class SignUpActivity extends AppCompatActivity {
 
                 }
 
-                else{
+                /*else{
                     final Response.Listener<String> responseListener = new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
@@ -105,7 +113,7 @@ public class SignUpActivity extends AppCompatActivity {
                     RegisterRequest registerRequest = new RegisterRequest(name, email, phone, password, responseListener);
                     MyApp.getInstance().addToRequestQueue(registerRequest);
 
-                }
+                }*/
 
 
             }

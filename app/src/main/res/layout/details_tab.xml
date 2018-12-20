@@ -28,29 +28,30 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/black"
-                android:textSize="14sp" />
+                android:textSize="16sp" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/tour_date"
                 android:textColor="@color/colorPrimaryDark"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:drawableStart="@drawable/ic_today_black_24dp"
                 android:drawablePadding="8dp"
-                android:drawableTint="@color/colorPrimaryDark"
                 android:layout_marginTop="16dp"/>
             <TextView
                 android:id="@+id/from"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:textSize="16sp"
                 android:layout_marginStart="32dp"
                 android:layout_marginTop="16dp"/>
             <TextView
                 android:id="@+id/to"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:textSize="16sp"
                 android:layout_marginStart="32dp"
                 android:layout_marginTop="16dp"/>
             <!--<TextView
@@ -75,13 +76,14 @@
                 android:layout_height="wrap_content"
                 android:text="@string/agency"
                 android:textColor="@color/colorPrimaryDark"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:layout_marginTop="16dp"/>
             <TextView
                 android:id="@+id/agency"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
+                android:textSize="16sp"
+                android:textColor="@color/black"
                 android:layout_marginStart="32dp"
                 android:layout_marginTop="16dp"/>
         </LinearLayout>

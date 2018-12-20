@@ -44,7 +44,7 @@ public class SignInActivity extends AppCompatActivity {
                 final String mailorphone = etlmailorphone.getText().toString();
                 final String password =etlpassword.getText().toString();
 
-                Response.Listener<String> responseListener = new Response.Listener<String>() {
+                /*Response.Listener<String> responseListener = new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         try {
@@ -78,7 +78,7 @@ public class SignInActivity extends AppCompatActivity {
 
                 LoginRequest loginRequest=new LoginRequest(mailorphone,password,responseListener);
                 RequestQueue queue = Volley.newRequestQueue(getBaseContext());
-                queue.add(loginRequest);
+                queue.add(loginRequest);*/
         }
         });
     }

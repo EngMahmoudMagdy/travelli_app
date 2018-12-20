@@ -206,11 +206,11 @@ public class MainActivity extends AppCompatActivity {
 
         ArrayList<String> countryStored = SharedPreference.loadList(MainActivity.this, Utils.PREFS_NAME, Utils.KEY_COUNTRIES);
         View view = MainActivity.this.getLayoutInflater().inflate(R.layout.view_toolbar_search, null);
-        LinearLayout parentToolbarSearch = (LinearLayout) view.findViewById(R.id.parent_toolbar_search);
-        ImageView imgToolBack = (ImageView) view.findViewById(R.id.img_tool_back);
-        final EditText edtToolSearch = (EditText) view.findViewById(R.id.edt_tool_search);
-        final ListView listSearch = (ListView) view.findViewById(R.id.list_search);
-        final TextView txtEmpty = (TextView) view.findViewById(R.id.txt_empty);
+        LinearLayout parentToolbarSearch = view.findViewById(R.id.parent_toolbar_search);
+        ImageView imgToolBack = view.findViewById(R.id.img_tool_back);
+        final EditText edtToolSearch = view.findViewById(R.id.edt_tool_search);
+        final ListView listSearch = view.findViewById(R.id.list_search);
+        final TextView txtEmpty = view.findViewById(R.id.txt_empty);
         Utils.setListViewHeightBasedOnChildren(listSearch);
         edtToolSearch.setHint("Search your tour");
         final Dialog toolbarSearchDialog = new Dialog(MainActivity.this, R.style.MaterialSearch);

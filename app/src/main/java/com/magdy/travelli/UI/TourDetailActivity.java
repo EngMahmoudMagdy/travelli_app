@@ -169,7 +169,55 @@ public class TourDetailActivity extends AppCompatActivity {
         hotspots = new ArrayList<>();
         if (savedInstanceState == null) {
             mediaList  = new ArrayList<>();
-            downloadMedia(tour.getId());
+            //downloadMedia(tour.getId());
+            String response = "{\"medias\":[{\"id\":\"3\",\"media\":\"http:\\/\\/www.mediafire.com\\/convkey\\/0e8a\\/2h1umltmsuyvr5hzg.jpg\",\"name\":\"coptic musuem 2\",\"type\":0},{\"id\":\"2\",\"media\":\"http:\\/\\/www.mediafire.com\\/convkey\\/cd07\\/mscgjaxdxnv2a68zg.jpg\",\"name\":\"religion complex\",\"type\":0},{\"id\":\"1\",\"media\":\"http:\\/\\/www.mediafire.com\\/convkey\\/4dfd\\/svg58lcaz05uzjizg.jpg\",\"name\":\"coptic museum 1\",\"type\":0},{\"id\":\"5\",\"media\":\"https:\\/\\/pannellum.org\\/images\\/video\\/jfk.mp4\",\"name\":\"The airport\",\"type\":1}],\"success\":1}";
+            try {
+                JSONObject o = new JSONObject(response);
+                int suc = o.getInt("success");
+                if (suc==1) {
+                    JSONArray arr = o.getJSONArray("medias");
+                    Media media;
+                    mediaList.clear();
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject obj = (JSONObject) arr.get(i);
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MMM-dd hh:mm a z", Locale.getDefault());
+                        media = new Media();
+                        media.setId(obj.getString("id"));
+                        media.setLink(obj.getString("media"));
+                        media.setName(obj.getString("name"));
+                        media.setType(obj.getInt("type"));
+                        mediaList.add(media);
+                    }
+                    turn = 0;
+                    if (!mediaList.isEmpty()) {
+                        currentMedia = mediaList.get(0);
+                        indicator.setText(String.format(Locale.getDefault(),"%d ==> %d",turn+1,mediaList.size()));
+                        //getmVRLibrary().onResume(getBaseContext());
+                        if (currentMedia.getType() == 0) {
+                            imageStart();
+                            downloadHotspots(currentMedia.getId());
+                            mVRLibrary.notifyPlayerChanged();
+                        } else {
+                            videoStart();
+                            Intent mServiceIntent = new Intent(getBaseContext(), VideoDownloadService.class);
+                            mServiceIntent.putExtra(URL,currentMedia.getLink());
+                            mServiceIntent.putExtra(ID, currentMedia.getId());
+                            startService(mServiceIntent);
+                            isReady=true;
+                        }
+                    }
+                    else
+                    {
+                        right.setVisibility(View.INVISIBLE);
+                        left.setVisibility(View.INVISIBLE);
+                    }
+                    Toast.makeText(getBaseContext(), "Media links download complete!", Toast.LENGTH_SHORT).show();
+                }
+                else Toast.makeText(getBaseContext(), o.getString("message"), Toast.LENGTH_SHORT).show();
+            } catch (JSONException e) {
+                Toast.makeText(getBaseContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
         }
         else
         {
@@ -764,7 +812,7 @@ public class TourDetailActivity extends AppCompatActivity {
         });
         MyApp.getInstance().addToRequestQueue(stringRequest);
     }
-    void downloadHotspots(String id)
+    void downloadHotspots2(String id)
     {
         removePlugins();
         Uri uri = Uri.parse(Constants.BASE+"/hotspots_of_media.php").buildUpon().appendQueryParameter("id",id).build();
@@ -805,6 +853,51 @@ public class TourDetailActivity extends AppCompatActivity {
             }
         });
         MyApp.getInstance().addToRequestQueue(stringRequest);
+    }
+    void downloadHotspots(String id)
+    {
+        String response = "";
+        switch (Integer.parseInt(id))
+        {
+            case 1:
+                response = "{\"hotspots\":[{\"id\":\"1\",\"text\":\"2\",\"yaw\":25.920267219381,\"pitch\":5.0098862414458,\"type\":1},{\"id\":\"2\",\"text\":\"3\",\"yaw\":-15.920267219381,\"pitch\":5.0098862414458,\"type\":1}],\"success\":1}";
+                break;
+            case 2:
+                response = "{\"hotspots\":[{\"id\":\"3\",\"text\":\"1\",\"yaw\":-156.30399964212,\"pitch\":-0.13624313075199,\"type\":1},{\"id\":\"4\",\"text\":\"3\",\"yaw\":-156.30399964212,\"pitch\":-0.13624313075199,\"type\":1},{\"id\":\"5\",\"text\":\"this is the hanging church it is a historical place in Egypt\",\"yaw\":66.052202336034,\"pitch\":2.682307006456,\"type\":0}],\"success\":1}\n";
+                break;
+            case 3:
+                response = "{\"hotspots\":[{\"id\":\"6\",\"text\":\"1\",\"yaw\":-100.92026721938,\"pitch\":5.0098862414458,\"type\":1}],\"success\":1}\n";
+                break;
+        }
+
+        if (!response.isEmpty())
+        {
+            try {
+                JSONObject o = new JSONObject(response);
+                int suc = o.getInt("success");
+                if (suc==1) {
+                    JSONArray arr = o.getJSONArray("hotspots");
+                    Hotspot hotspot;
+                    hotspots.clear();
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject obj = (JSONObject) arr.get(i);
+                        hotspot = new Hotspot(obj.getString("id")
+                                ,obj.getString("text")
+                                ,obj.getDouble("yaw")
+                                ,obj.getDouble("pitch")
+                                ,obj.getInt("type"));
+                        addHotspot(hotspot);
+                        hotspots.add(hotspot);
+                    }
+                    Toast.makeText(getBaseContext(), "Hotspots download complete!", Toast.LENGTH_SHORT).show();
+                }
+                else Toast.makeText(getBaseContext(), o.getString("message"), Toast.LENGTH_SHORT).show();
+            } catch (JSONException e) {
+                Toast.makeText(getBaseContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
+        }
+
     }
     void addHotspot(final Hotspot hotspot)
     {

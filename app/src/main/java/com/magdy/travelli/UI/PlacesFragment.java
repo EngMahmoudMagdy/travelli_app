@@ -17,7 +17,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.magdy.travelli.Adapters.PlaceAdapter;
 import com.magdy.travelli.Data.Constants;
@@ -37,16 +36,17 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class PlacesFragment extends Fragment {
-    List<Place>places ;
-    Tour tour ;
-    RequestQueue queue ;
+    List<Place> places;
+    Tour tour;
+    RequestQueue queue;
     PlaceAdapter adapter;
-    public static PlacesFragment newInstance(Tour tour)
-    {
+
+    public static PlacesFragment newInstance(Tour tour) {
         PlacesFragment fragment = new PlacesFragment();
-        fragment.tour = tour ;
-        return fragment ;
+        fragment.tour = tour;
+        return fragment;
     }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.place_tab_in_tour_details, container, false);
@@ -62,24 +62,52 @@ public class PlacesFragment extends Fragment {
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setHasFixedSize(true);
         places = new ArrayList<>();
-        adapter = new PlaceAdapter(places,getContext());
+        adapter = new PlaceAdapter(places, getContext());
         recyclerView.setAdapter(adapter);
-        if (savedInstanceState!=null)
+        if (savedInstanceState != null)
             tour = (Tour) savedInstanceState.getSerializable(Constants.TOUR);
         downloadPlaces(tour.getId());
+        String response = "{\"places\":[{\"id\":\"2\",\"name\":\"Egyptian Museum\",\"longt\":\"31.2337\",\"lat\":\"30.0475\",\"description\":\"Known as one of the richest museums of ancient history in the World, the Egyptian Museum in Cairo has over 120,000 interesting historical items on display. Those include the items found in the Tomb of Tutankhamen, a number of ancient mummies, and plenty of other amazing items. The museum is also famous with its extended collections of ancient coins and papyrus.\",\"image\":\"https:\\/\\/lh6.googleusercontent.com\\/proxy\\/a6DBkKoQbGdDmpshpYmfbv0lLhuikAL9DnyC8ib59lvXniGvRPEiamVd20AI2I3zmHMcwuD-iFaRymK4tVFWwuETZkk2UCRfJ95wjK495aLLz8DwZo6sc-Fpr4oR-XghE2JsfTsP4o3foIzX0-let04-KdIhNM8=w221-h160-k-no\"},{\"id\":\"3\",\"name\":\"The hanged church\",\"longt\":\"31.2302\",\"lat\":\"30.0053\",\"description\":\"The Hanging Church\\r\\nKom Ghorab\\r\\nMisr Al Qadimah\\r\\nCairo Governorate\\r\\nEgypt\",\"image\":\"https:\\/\\/lh4.googleusercontent.com\\/proxy\\/lRRGBfPTHbGygeXOM06R56jgs42Ba4OYd0PIQWgamJ8fJiJbc2d65XMGAljVocyFCMRVicwx034UZcfhBLhLi8ola-MqIwk7rZuRFCWBHadSvALJ7Q-PswBoh2-xEgqfad_KbJLrVO6jWI-9htSGJPljPAlPEoc=w240-h160-k-no\"}],\"success\":1}";
+        try {
+            JSONObject o = new JSONObject(response);
+            int suc = o.getInt("success");
+            if (suc == 1) {
+                JSONArray arr = o.getJSONArray("places");
+                Place place;
+                places.clear();
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = (JSONObject) arr.get(i);
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MMM-dd hh:mm a z", Locale.getDefault());
+                    place = new Place();
+                    place.setId(obj.getString("id"));
+                    place.setImageLink(obj.getString("image"));
+                    place.setName(obj.getString("name"));
+                    place.setDescription(obj.getString("description"));
+                    place.setLongt(obj.getDouble("longt"));
+                    place.setLat(obj.getDouble("lat"));
+                    places.add(place);
+                }
+            } else Toast.makeText(getContext(), o.getString("message"), Toast.LENGTH_SHORT).show();
+            adapter.notifyDataSetChanged();
+        } catch (JSONException e) {
+            Toast.makeText(getContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+
+
     }
-    void downloadPlaces(String id)
-    {
-        Uri uri = Uri.parse(Constants.BASE+"/tour_places.php").buildUpon().appendQueryParameter("id",id).build();
+
+    void downloadPlaces(String id) {
+        Uri uri = Uri.parse(Constants.BASE + "/tour_places.php").buildUpon().appendQueryParameter("id", id).build();
         StringRequestNew stringRequest = new StringRequestNew(Request.Method.GET, uri.toString(),
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.v("data",response);
+                        Log.v("data", response);
                         try {
                             JSONObject o = new JSONObject(response);
                             int suc = o.getInt("success");
-                            if (suc==1) {
+                            if (suc == 1) {
                                 JSONArray arr = o.getJSONArray("places");
                                 Place place;
                                 places.clear();
@@ -95,8 +123,8 @@ public class PlacesFragment extends Fragment {
                                     place.setLat(obj.getDouble("lat"));
                                     places.add(place);
                                 }
-                            }
-                            else Toast.makeText(getContext(), o.getString("message"), Toast.LENGTH_SHORT).show();
+                            } else
+                                Toast.makeText(getContext(), o.getString("message"), Toast.LENGTH_SHORT).show();
                             adapter.notifyDataSetChanged();
                         } catch (JSONException e) {
                             Toast.makeText(getContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
@@ -106,7 +134,7 @@ public class PlacesFragment extends Fragment {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getContext(),error.getMessage(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
         queue.add(stringRequest);
@@ -115,6 +143,6 @@ public class PlacesFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(Constants.TOUR,tour);
+        outState.putSerializable(Constants.TOUR, tour);
     }
 }

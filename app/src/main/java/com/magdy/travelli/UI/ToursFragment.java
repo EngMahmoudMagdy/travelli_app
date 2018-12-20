@@ -46,25 +46,26 @@ import io.rmiri.skeleton.Master.SkeletonConfig;
  * Created by engma on 10/4/2017.
  */
 
-public class ToursFragment extends Fragment implements TourInfoListener{
-    static ToursFragment newInstance()
-    {
+public class ToursFragment extends Fragment implements TourInfoListener {
+    static ToursFragment newInstance() {
         ToursFragment f = new ToursFragment();
         f.setArguments(new Bundle());
         return f;
     }
-    ArrayList<Tour>tours;
-    TourRecyclerAdapter adapter ;
+
+    ArrayList<Tour> tours;
+    TourRecyclerAdapter adapter;
     RecyclerView tourRecycler;
     SwipeRefreshLayout swipeRefreshLayout;
-    RequestQueue queue ;
-    SkeletonConfig config ;
-    String url =Constants.BASE+"view_tours.php";
+    RequestQueue queue;
+    SkeletonConfig config;
+    String url = Constants.BASE + "view_tours.php";
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.fragment_tours,container,false);
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.fragment_tours, container, false);
         return view;
     }
 
@@ -82,9 +83,9 @@ public class ToursFragment extends Fragment implements TourInfoListener{
             public void isCanSet() {
                 tourRecycler.setAdapter(adapter);
             }
-        },this);
+        }, this);
         config = adapter.getSkeletonConfig();
-        swipeRefreshLayout =  view.findViewById(R.id.swipe_refresh);
+        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -93,8 +94,8 @@ public class ToursFragment extends Fragment implements TourInfoListener{
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-
-                        downloadData();
+                        dummy();
+                        //downloadData();
                     }
                 }, 1500);
             }
@@ -106,15 +107,47 @@ public class ToursFragment extends Fragment implements TourInfoListener{
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                downloadData();
+                //downloadData();
+                dummy();
             }
         }, 1500);
     }
-
-    void downloadData()
+    void dummy()
     {
-        CookieHandler.setDefault( new CookieManager( null, CookiePolicy.ACCEPT_ALL ) );
-        if (getContext()!=null) {
+        String response = "{\"tours\":[{\"id\":\"1\",\"name\":\"Old City (Coptic ) Religion Tour in Cairo\",\"description\":\"It contains many churches such as the Margaris Synagogue and the Babylonian Fortress. The synagogue is outstanding. And the monastery of Margrages for nuns and many other churches and the Jewish Temple and the Mosque of Amr ibn al-Aas and some old houses and feel was the wheel of time back to this age I nominate everyone to visit\",\"agency\":\"Delta Agency\",\"from\":\"1533880800000\",\"to\":\"1534780800000\",\"image\":\"https:\\/\\/media-cdn.tripadvisor.com\\/media\\/photo-w\\/13\\/04\\/d0\\/03\\/photo4jpg.jpg\",\"price\":\"1000\",\"fav\":true,\"rate\":\"4.5000\",\"reviewers\":\"2\"},{\"id\":\"6\",\"name\":\"Enjoy the Weather in Alex. now\",\"description\":\"Site of Pharos lighthouse, one of the Wonders of the World, and of Anthony and Cleopatra's tempestuous romance, the city was founded by Alexander the Great in 331 BCE. Today, Alexandria offers fascinating insights into its proud Greek past, as well as interesting mosques, the casino strip of the Corniche, some lovely gardens and both modern and traditional hotels.\",\"agency\":\"North Coast Agency\",\"from\":\"1534780800000\",\"to\":\"1535212800000\",\"image\":\"https:\\/\\/media-cdn.tripadvisor.com\\/media\\/photo-o\\/01\\/2d\\/16\\/f1\\/thei-view-from-the-renaissance.jpg\",\"price\":\"3000\",\"fav\":true,\"rate\":\"0\",\"reviewers\":\"0\"}],\"success\":1}";
+        try {
+            JSONObject o = new JSONObject(response);
+            JSONArray arr = o.getJSONArray("tours");
+            tours.clear();
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject obj = (JSONObject) arr.get(i);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MMM-dd hh:mm a z", Locale.getDefault());
+                Tour p = new Tour(obj.getString("id"),
+                        obj.getString("name"),
+                        obj.getString("description"),
+                        obj.getInt("price"),
+                        obj.getString("image"),
+                        dateFormat.format(obj.getDouble("from")),
+                        dateFormat.format(obj.getDouble("to")),
+                        obj.getString("agency"),
+                        Float.parseFloat(obj.getString("rate")),
+                        Integer.parseInt(obj.getString("reviewers"))
+                        , obj.getBoolean("fav"));
+                tours.add(p);
+            }
+            adapter.addMoreDataAndSkeletonFinish((ArrayList<Tour>) tours);
+            //Toast.makeText(getContext(), "DB download completed!", Toast.LENGTH_LONG).show();
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            //Toast.makeText(getContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+
+        swipeRefreshLayout.setRefreshing(false);
+    }
+    void downloadData() {
+        CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
+        if (getContext() != null) {
             queue = Volley.newRequestQueue(Objects.requireNonNull(getContext()));
             StringRequestNew stringRequest = new StringRequestNew(Request.Method.GET, url,
                     new Response.Listener<String>() {
@@ -161,10 +194,11 @@ public class ToursFragment extends Fragment implements TourInfoListener{
             MyApp.getInstance().addToRequestQueue(stringRequest);
         }
     }
+
     @Override
     public void setSelected(Tour tour) {
-        Intent i = new Intent(getContext(),TourDetailActivity.class);
-        i.putExtra(Constants.TOUR,tour);
+        Intent i = new Intent(getContext(), TourDetailActivity.class);
+        i.putExtra(Constants.TOUR, tour);
         startActivity(i);
         //Toast.makeText(getContext(),tour.getName()+"\n"+tour.getDetials(),Toast.LENGTH_SHORT).show();
     }

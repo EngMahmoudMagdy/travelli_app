@@ -1,22 +1,15 @@
 package com.magdy.travelli.UI;
 
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 
 import com.magdy.travelli.Adapters.ReviewsAdapter;
 import com.magdy.travelli.Data.Constants;
@@ -25,11 +18,11 @@ import com.magdy.travelli.Data.Tour;
 import com.magdy.travelli.R;
 
 import java.util.List;
-import java.util.Objects;
 
 public class ReviewsFragment extends Fragment {
-    List<Review>reviews ;
+    List<Review> reviews;
     Tour tour;
+
     public static ReviewsFragment newInstance(Tour tour) {
         ReviewsFragment fragment = new ReviewsFragment();
         fragment.tour = tour;
@@ -41,14 +34,13 @@ public class ReviewsFragment extends Fragment {
         View view = inflater.inflate(R.layout.reviews_tab, container, false);
 
 
-
         RecyclerView recyclerView = view.findViewById(R.id.reviews_scrollableview);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity().getBaseContext());
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setHasFixedSize(true);
 
-        ReviewsAdapter adapter = new ReviewsAdapter(getContext(),reviews);
+        ReviewsAdapter adapter = new ReviewsAdapter(getContext(), reviews);
         recyclerView.setAdapter(adapter);
 
         return view;
@@ -57,13 +49,13 @@ public class ReviewsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (savedInstanceState!=null)
-            tour= (Tour) savedInstanceState.getSerializable(Constants.TOUR);
+        if (savedInstanceState != null)
+            tour = (Tour) savedInstanceState.getSerializable(Constants.TOUR);
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(Constants.TOUR,tour);
+        outState.putSerializable(Constants.TOUR, tour);
     }
 }

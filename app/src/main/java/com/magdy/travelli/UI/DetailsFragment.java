@@ -14,24 +14,25 @@ import com.magdy.travelli.Data.Tour;
 import com.magdy.travelli.R;
 
 public class DetailsFragment extends Fragment {
-    Tour tour ;
-    public static DetailsFragment newInstance(Tour tour)
-    {
+    Tour tour;
+
+    public static DetailsFragment newInstance(Tour tour) {
         DetailsFragment fragment = new DetailsFragment();
-        fragment.tour = tour ;
-        return fragment ;
+        fragment.tour = tour;
+        return fragment;
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         return inflater.inflate(R.layout.details_tab, container, false);
     }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (savedInstanceState!=null)
-            tour= (Tour) savedInstanceState.getSerializable(Constants.TOUR);
+        if (savedInstanceState != null)
+            tour = (Tour) savedInstanceState.getSerializable(Constants.TOUR);
         TextView textView = view.findViewById(R.id.name);
         textView.setText(tour.getName());
         textView = view.findViewById(R.id.description);
@@ -49,6 +50,6 @@ public class DetailsFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(Constants.TOUR,tour);
+        outState.putSerializable(Constants.TOUR, tour);
     }
 }
