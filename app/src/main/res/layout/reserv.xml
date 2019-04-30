@@ -10,14 +10,13 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/ahram"
+        android:src="@drawable/airport_back"
         android:background="@color/light_grey"
         android:scaleType="centerCrop"
         android:layout_gravity="center"/>
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#66475d89">
+        android:layout_height="match_parent">
 
         <LinearLayout
 
