@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1053438660715",
+    "firebase_url": "https://travelli-181902.firebaseio.com",
+    "project_id": "travelli-181902",
+    "storage_bucket": "travelli-181902.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1053438660715:android:0336cd546ea1e24d",
+        "android_client_info": {
+          "package_name": "com.magdy.travelli"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1053438660715-l739oq2uirocttuk30lkrsrpkkpt1gm3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.magdy.travelli",
+            "certificate_hash": "e320d8b443f5c26b5a4e1c3c3237a3c6febc80a3"
+          }
+        },
+        {
+          "client_id": "1053438660715-ij0f7gkkio71s8n5l05lmcnkp43edqfc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBoiT9-_lYiXCIwVRoNnVl9pGDv1AnwDZQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1053438660715-ij0f7gkkio71s8n5l05lmcnkp43edqfc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
