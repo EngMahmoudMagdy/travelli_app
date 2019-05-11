@@ -7,23 +7,26 @@ import java.io.Serializable;
  */
 
 public class Tour implements Serializable {
-    private String id , name , detials, imageLink , from , to,agency ;
-    private int price , reviewers;
-    private float rate ;
-    private boolean fav ;
-    public Tour(String id , String name , String detials , int price ,String imageLink,String from,String to,String agency , float rate , int reviewers,boolean fav)
-    {
-        this.id=id;
-        this.fav=fav;
-        this.reviewers = reviewers ;
+    private String id, name, detials, imageLink, from, to, agency, key;
+    private int price, reviewers;
+    private float rate;
+    private boolean fav;
+
+    public Tour() {
+    }
+
+    public Tour(String id, String name, String detials, int price, String imageLink, String from, String to, String agency, float rate, int reviewers, boolean fav) {
+        this.id = id;
+        this.fav = fav;
+        this.reviewers = reviewers;
         this.rate = rate;
-        this.name =name;
-        this.detials=detials;
-        this.price=price;
-        this.imageLink=imageLink;
-        this.agency=agency;
-        this.from =from;
-        this.to=to;
+        this.name = name;
+        this.detials = detials;
+        this.price = price;
+        this.imageLink = imageLink;
+        this.agency = agency;
+        this.from = from;
+        this.to = to;
     }
 
     public boolean isFav() {
@@ -103,7 +106,6 @@ public class Tour implements Serializable {
     }
 
 
-
     public String getName() {
         return name;
     }
@@ -116,5 +118,11 @@ public class Tour implements Serializable {
         return id;
     }
 
+    public String getKey() {
+        return key;
+    }
 
+    public void setKey(String key) {
+        this.key = key;
+    }
 }

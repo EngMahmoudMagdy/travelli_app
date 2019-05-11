@@ -1,6 +1,6 @@
 package com.magdy.travelli.UI;
+
 import android.app.DialogFragment;
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,28 +27,30 @@ import io.rmiri.skeleton.Master.SkeletonConfig;
 
 public class Favourite extends DialogFragment implements TourInfoListener {
     ArrayList<Tour> favs;
-    TourRecyclerAdapter adapter ;
+    TourRecyclerAdapter adapter;
     RecyclerView favRecycler;
     SwipeRefreshLayout swipeRefreshLayout;
-    SkeletonConfig config ;
-    static Favourite newInstance()
-    {
+    SkeletonConfig config;
+
+    static Favourite newInstance() {
         Favourite f = new Favourite();
         f.setArguments(new Bundle());
         return f;
     }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(android.support.v4.app.DialogFragment.STYLE_NO_FRAME, android.R.style.Theme_Holo_Light_DarkActionBar);
 
     }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fg_favourite, container, false);
         Toolbar actionBar = v.findViewById(R.id.toolbar);
-        if (actionBar!=null) {
+        if (actionBar != null) {
             actionBar.setTitle(getString(R.string.fav));
             actionBar.setNavigationOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
@@ -58,6 +60,7 @@ public class Favourite extends DialogFragment implements TourInfoListener {
         }
         return v;
     }
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -66,14 +69,8 @@ public class Favourite extends DialogFragment implements TourInfoListener {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         favRecycler.setLayoutManager(linearLayoutManager);
         favRecycler.setHasFixedSize(true);
-        adapter = new TourRecyclerAdapter(Objects.requireNonNull(getActivity()).getApplicationContext(), favs, favRecycler, new IsCanSetAdapterListener() {
-            @Override
-            public void isCanSet() {
-                favRecycler.setAdapter(adapter);
-            }
-        },this);
-        config = adapter.getSkeletonConfig();
-        swipeRefreshLayout =  view.findViewById(R.id.swipe_refresh);
+        adapter = new TourRecyclerAdapter(getActivity().getBaseContext(), favs, this);
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -102,8 +99,8 @@ public class Favourite extends DialogFragment implements TourInfoListener {
 
     @Override
     public void setSelected(Tour tour) {
-        Intent i = new Intent(getActivity().getApplicationContext(),TourDetailActivity.class);
-        i.putExtra(Constants.TOUR,tour);
+        Intent i = new Intent(getActivity().getApplicationContext(), TourDetailActivity.class);
+        i.putExtra(Constants.TOUR, tour);
         startActivity(i);
     }
 }

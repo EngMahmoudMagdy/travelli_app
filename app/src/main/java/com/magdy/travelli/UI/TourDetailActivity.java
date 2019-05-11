@@ -1,6 +1,5 @@
 package com.magdy.travelli.UI;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,25 +7,20 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.opengl.GLSurfaceView;
-import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.util.SimpleArrayMap;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.AppCompatSeekBar;
 import android.util.Log;
@@ -41,12 +35,10 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.asha.vrlib.MD360Director;
 import com.asha.vrlib.MD360DirectorFactory;
@@ -61,18 +53,18 @@ import com.asha.vrlib.plugins.MDWidgetPlugin;
 import com.asha.vrlib.plugins.hotspot.IMDHotspot;
 import com.asha.vrlib.texture.MD360BitmapTexture;
 import com.google.android.apps.muzei.render.GLTextureView;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.magdy.travelli.Adapters.CustomProjectionFactory;
 import com.magdy.travelli.Adapters.MediaPlayerWrapper;
-import com.magdy.travelli.Adapters.PlaceAdapter;
-import com.magdy.travelli.Adapters.ReviewsAdapter;
 import com.magdy.travelli.Data.Constants;
 import com.magdy.travelli.Data.Hotspot;
 import com.magdy.travelli.Data.Media;
-import com.magdy.travelli.Data.Place;
 import com.magdy.travelli.Data.Tour;
 import com.magdy.travelli.R;
 import com.magdy.travelli.Services.StringRequestNew;
 import com.magdy.travelli.Services.VideoDownloadService;
+import com.magdy.travelli.helpers.StaticMembers;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -80,13 +72,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
@@ -104,29 +93,29 @@ import static com.squareup.picasso.MemoryPolicy.NO_STORE;
 public class TourDetailActivity extends AppCompatActivity {
 
     private static final String TAG = TourDetailActivity.class.getSimpleName();
-    private MDVRLibrary mVRLibrary,mVideoLib;
+    private MDVRLibrary mVRLibrary, mVideoLib;
     private Button playButton;
     private ProgressBar progressBar;
     private AppCompatSeekBar seekBar;
     private ImageButton controllers;
     private FrameLayout controllersLayout;
-    FloatingActionButton reserve , addReview ;
-    AppCompatImageButton right , left ;
-    private Target mTarget , scndTarget;
+    FloatingActionButton reserve, addReview;
+    AppCompatImageButton right, left;
+    private Target mTarget, scndTarget;
     Tour tour;
-    private GLTextureView imageView , videoView;
+    private GLTextureView imageView, videoView;
     String outFilePath;
     private MediaPlayerWrapper mMediaPlayerWrapper;
     private MDVRLibrary.IImageLoadProvider mImageLoadProvider = new ImageLoadProvider();
 
-    boolean isReady = false , isPlaying = false , loadingBool= false , isImage = true ;
-    RequestQueue queue ;
-    ArrayList<Media> mediaList ;
-    ArrayList<Hotspot>hotspots ;
-    private List<MDAbsPlugin> plugins ;
+    boolean isReady = false, isPlaying = false, loadingBool = false, isImage = true;
+    RequestQueue queue;
+    ArrayList<Media> mediaList;
+    ArrayList<Hotspot> hotspots;
+    private List<MDAbsPlugin> plugins;
     int turn = 0;
     Media currentMedia;
-    TextView indicator ;
+    TextView indicator;
     TextToSpeech textToSpeech;
     boolean canspeak = false;
     private ViewPager mViewPager;
@@ -146,19 +135,15 @@ public class TourDetailActivity extends AppCompatActivity {
         textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
-                if(status == TextToSpeech.SUCCESS)
-                {
+                if (status == TextToSpeech.SUCCESS) {
                     int result = textToSpeech.setLanguage(Locale.US);
-                    if (result == TextToSpeech.LANG_MISSING_DATA||result == TextToSpeech.LANG_NOT_SUPPORTED)
-                    {
-                        Toast.makeText(getBaseContext(),"Not supported",Toast.LENGTH_SHORT).show();
+                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        Toast.makeText(getBaseContext(), "Not supported", Toast.LENGTH_SHORT).show();
+                    } else {
+                        canspeak = true;
                     }
-                    else {
-                        canspeak=true;
-                    }
-                }
-                else {
-                    Toast.makeText(getBaseContext(),"Init failed",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getBaseContext(), "Init failed", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -168,13 +153,13 @@ public class TourDetailActivity extends AppCompatActivity {
         videoStart();
         hotspots = new ArrayList<>();
         if (savedInstanceState == null) {
-            mediaList  = new ArrayList<>();
+            mediaList = new ArrayList<>();
             //downloadMedia(tour.getId());
             String response = "{\"medias\":[{\"id\":\"3\",\"media\":\"http:\\/\\/www.mediafire.com\\/convkey\\/0e8a\\/2h1umltmsuyvr5hzg.jpg\",\"name\":\"coptic musuem 2\",\"type\":0},{\"id\":\"2\",\"media\":\"http:\\/\\/www.mediafire.com\\/convkey\\/cd07\\/mscgjaxdxnv2a68zg.jpg\",\"name\":\"religion complex\",\"type\":0},{\"id\":\"1\",\"media\":\"http:\\/\\/www.mediafire.com\\/convkey\\/4dfd\\/svg58lcaz05uzjizg.jpg\",\"name\":\"coptic museum 1\",\"type\":0},{\"id\":\"5\",\"media\":\"https:\\/\\/pannellum.org\\/images\\/video\\/jfk.mp4\",\"name\":\"The airport\",\"type\":1}],\"success\":1}";
             try {
                 JSONObject o = new JSONObject(response);
                 int suc = o.getInt("success");
-                if (suc==1) {
+                if (suc == 1) {
                     JSONArray arr = o.getJSONArray("medias");
                     Media media;
                     mediaList.clear();
@@ -186,61 +171,59 @@ public class TourDetailActivity extends AppCompatActivity {
                         media.setLink(obj.getString("media"));
                         media.setName(obj.getString("name"));
                         media.setType(obj.getInt("type"));
+
                         mediaList.add(media);
                     }
+                    /*for (Media m : mediaList) {
+                        DatabaseReference dr = FirebaseDatabase.getInstance().getReference(StaticMembers.MEDIA).push();
+                        dr.setValue(m);
+                        m.setKey(dr.getKey());
+                    }*/
                     turn = 0;
                     if (!mediaList.isEmpty()) {
                         currentMedia = mediaList.get(0);
-                        indicator.setText(String.format(Locale.getDefault(),"%d ==> %d",turn+1,mediaList.size()));
+                        indicator.setText(String.format(Locale.getDefault(), "%d ==> %d", turn + 1, mediaList.size()));
                         //getmVRLibrary().onResume(getBaseContext());
                         if (currentMedia.getType() == 0) {
                             imageStart();
-                            downloadHotspots(currentMedia.getId());
+                            downloadHotspots(currentMedia.getId(), currentMedia.getKey());
                             mVRLibrary.notifyPlayerChanged();
                         } else {
                             videoStart();
                             Intent mServiceIntent = new Intent(getBaseContext(), VideoDownloadService.class);
-                            mServiceIntent.putExtra(URL,currentMedia.getLink());
+                            mServiceIntent.putExtra(URL, currentMedia.getLink());
                             mServiceIntent.putExtra(ID, currentMedia.getId());
                             startService(mServiceIntent);
-                            isReady=true;
+                            isReady = true;
                         }
-                    }
-                    else
-                    {
+                    } else {
                         right.setVisibility(View.INVISIBLE);
                         left.setVisibility(View.INVISIBLE);
                     }
                     Toast.makeText(getBaseContext(), "Media links download complete!", Toast.LENGTH_SHORT).show();
-                }
-                else Toast.makeText(getBaseContext(), o.getString("message"), Toast.LENGTH_SHORT).show();
+                } else
+                    Toast.makeText(getBaseContext(), o.getString("message"), Toast.LENGTH_SHORT).show();
             } catch (JSONException e) {
                 Toast.makeText(getBaseContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
-        }
-        else
-        {
-                mediaList = savedInstanceState.getParcelableArrayList(Constants.CURRRENT_MED);
-                turn = savedInstanceState.getInt(Constants.TURN_MED);
-                currentMedia = mediaList.get(turn);
-                indicator.setText(String.format(Locale.getDefault(),"%d ==> %d",turn+1,mediaList.size()));
-                updateRightLeft();
-            if (currentMedia.getType()>0)
-            {
+        } else {
+            mediaList = savedInstanceState.getParcelableArrayList(Constants.CURRRENT_MED);
+            turn = savedInstanceState.getInt(Constants.TURN_MED);
+            currentMedia = mediaList.get(turn);
+            indicator.setText(String.format(Locale.getDefault(), "%d ==> %d", turn + 1, mediaList.size()));
+            updateRightLeft();
+            if (currentMedia.getType() > 0) {
                 outFilePath = savedInstanceState.getString(Constants.FILE);
                 videoStart();
-                isReady=true;
+                isReady = true;
                 MDVRLibrary library = getmVRLibrary();
                 library.notifyPlayerChanged();
-                setVideoUri(outFilePath,savedInstanceState.getLong(SEEK));
-            }
-            else
-            {
+                setVideoUri(outFilePath, savedInstanceState.getLong(SEEK));
+            } else {
                 hotspots = savedInstanceState.getParcelableArrayList(Constants.CURRRENT_HS);
                 assert hotspots != null;
-                for (Hotspot hotspot:hotspots)
-                {
+                for (Hotspot hotspot : hotspots) {
                     addHotspot(hotspot);
                 }
                 imageStart();
@@ -261,13 +244,10 @@ public class TourDetailActivity extends AppCompatActivity {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 mViewPager.setCurrentItem(tab.getPosition());
-                if(tab.getPosition()>1 )
-                {
+                if (tab.getPosition() > 1) {
                     addReview.setVisibility(View.VISIBLE);
                     reserve.setVisibility(View.GONE);
-                }
-                else
-                {
+                } else {
                     addReview.setVisibility(View.GONE);
                     reserve.setVisibility(View.VISIBLE);
                 }
@@ -289,26 +269,25 @@ public class TourDetailActivity extends AppCompatActivity {
             }
         });
     }
-    MDVRLibrary getmVRLibrary()
-    {
-        if (currentMedia!=null)
-        {
-            if (currentMedia.getType() == 0){
+
+    MDVRLibrary getmVRLibrary() {
+        if (currentMedia != null) {
+            if (currentMedia.getType() == 0) {
                 return mVideoLib;
-            }else
-            return mVRLibrary;
+            } else
+                return mVRLibrary;
         }
         return mVRLibrary;
     }
-    void videoStart()
-    {
-        loadingBool =false;
+
+    void videoStart() {
+        loadingBool = false;
         seekBar.setVisibility(View.VISIBLE);
         controllers.setVisibility(View.VISIBLE);
         controllersLayout.setVisibility(View.VISIBLE);
         imageView.setVisibility(View.GONE);
         videoView.setVisibility(View.VISIBLE);
-        if (mVideoLib==null) {
+        if (mVideoLib == null) {
             mVideoLib = MDVRLibrary.with(this)
                     .displayMode(MDVRLibrary.DISPLAY_MODE_NORMAL)
                     .interactiveMode(MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH)
@@ -377,9 +356,11 @@ public class TourDetailActivity extends AppCompatActivity {
                 if (fromUser)
                     getPlayer().seekTo(progress);
             }
+
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
             }
+
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
 
@@ -387,27 +368,24 @@ public class TourDetailActivity extends AppCompatActivity {
         });
         videoView.setTag(scndTarget);
     }
-    void buttonsInit()
-    {
+
+    void buttonsInit() {
         playButton = findViewById(R.id.playbut);
-        controllersLayout =findViewById(R.id.controllerslayout);
+        controllersLayout = findViewById(R.id.controllerslayout);
         controllersLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                controllersLayout.setVisibility(controllersLayout.getVisibility()==View.VISIBLE?View.INVISIBLE:View.VISIBLE);
+                controllersLayout.setVisibility(controllersLayout.getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
             }
         });
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mMediaPlayerWrapper.getPlayer().isPlaying())
-                {
+                if (mMediaPlayerWrapper.getPlayer().isPlaying()) {
                     playButton.setBackgroundDrawable(getResources().getDrawable(android.R.drawable.ic_media_play));
                     getPlayer().pause();
                     isPlaying = false;
-                }
-                else
-                {
+                } else {
                     playButton.setBackgroundDrawable(getResources().getDrawable(android.R.drawable.ic_media_pause));
                     getPlayer().start();
                     isPlaying = true;
@@ -419,54 +397,48 @@ public class TourDetailActivity extends AppCompatActivity {
         full.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(getBaseContext(),FullScreenActivity.class);
-                i.putExtra(Constants.CURRRENT_MED,currentMedia);
-                i.putExtra(Constants.ALLMED,mediaList);
-                if (currentMedia.getType()>0)
-                {
-                    i.putExtra(SEEK,getPlayer().getCurrentPosition());
-                    i.putExtra(URL,outFilePath);
-                    i.putExtra(ISREADY,isReady);
+                Intent i = new Intent(getBaseContext(), FullScreenActivity.class);
+                i.putExtra(Constants.CURRRENT_MED, currentMedia);
+                i.putExtra(Constants.ALLMED, mediaList);
+                if (currentMedia.getType() > 0) {
+                    i.putExtra(SEEK, getPlayer().getCurrentPosition());
+                    i.putExtra(URL, outFilePath);
+                    i.putExtra(ISREADY, isReady);
+                } else {
+                    i.putExtra(Constants.CURRRENT_HS, hotspots);
                 }
-                else
-                {
-                    i.putExtra(Constants.CURRRENT_HS,hotspots);
-                }
-                i.putExtra(VR,false);
+                i.putExtra(VR, false);
                 startActivity(i);
             }
         });
         full.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                makeToast(full,getString(R.string.fullscreen));
+                makeToast(full, getString(R.string.fullscreen));
                 return true;
             }
         });
         vr.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(getBaseContext(),FullScreenActivity.class);
-                i.putExtra(Constants.CURRRENT_MED,currentMedia);
-                i.putExtra(Constants.ALLMED,mediaList);
-                if (currentMedia.getType()>0)
-                {
-                    i.putExtra(SEEK,getPlayer().getCurrentPosition());
-                    i.putExtra(URL,outFilePath);
-                    i.putExtra(ISREADY,isReady);
+                Intent i = new Intent(getBaseContext(), FullScreenActivity.class);
+                i.putExtra(Constants.CURRRENT_MED, currentMedia);
+                i.putExtra(Constants.ALLMED, mediaList);
+                if (currentMedia.getType() > 0) {
+                    i.putExtra(SEEK, getPlayer().getCurrentPosition());
+                    i.putExtra(URL, outFilePath);
+                    i.putExtra(ISREADY, isReady);
+                } else {
+                    i.putExtra(Constants.CURRRENT_HS, hotspots);
                 }
-                else
-                {
-                    i.putExtra(Constants.CURRRENT_HS,hotspots);
-                }
-                i.putExtra(VR,true);
+                i.putExtra(VR, true);
                 startActivity(i);
             }
         });
         vr.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                makeToast(vr,getString(R.string.vr_mode));
+                makeToast(vr, getString(R.string.vr_mode));
                 return true;
             }
         });
@@ -486,14 +458,11 @@ public class TourDetailActivity extends AppCompatActivity {
         motionMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (getmVRLibrary().getInteractiveMode()==MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH)
-                {
-                    getmVRLibrary().switchInteractiveMode(getBaseContext(),MDVRLibrary.INTERACTIVE_MODE_TOUCH);
+                if (getmVRLibrary().getInteractiveMode() == MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH) {
+                    getmVRLibrary().switchInteractiveMode(getBaseContext(), MDVRLibrary.INTERACTIVE_MODE_TOUCH);
                     motionMode.setImageDrawable(getResources().getDrawable(R.drawable.ic_3d_rotation_black_24dp));
-                }
-                else
-                {
-                    getmVRLibrary().switchInteractiveMode(getBaseContext(),MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH);
+                } else {
+                    getmVRLibrary().switchInteractiveMode(getBaseContext(), MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH);
                     motionMode.setImageDrawable(getResources().getDrawable(R.drawable.ic_touch_app_black_24dp));
                 }
             }
@@ -501,13 +470,13 @@ public class TourDetailActivity extends AppCompatActivity {
         controllers.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                controllersLayout.setVisibility(controllersLayout.getVisibility()==View.VISIBLE?View.INVISIBLE:View.VISIBLE);
+                controllersLayout.setVisibility(controllersLayout.getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
             }
         });
         controllers.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                makeToast(controllers,getString(R.string.controllers));
+                makeToast(controllers, getString(R.string.controllers));
                 return true;
             }
         });
@@ -517,30 +486,26 @@ public class TourDetailActivity extends AppCompatActivity {
         left.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(turn>0 && !mediaList.isEmpty())
-                {
+                if (turn > 0 && !mediaList.isEmpty()) {
                     turn--;
                     currentMedia = mediaList.get(turn);
-                    indicator.setText(String.format(Locale.getDefault(),"%d ==> %d",turn+1,mediaList.size()));
-                    if (currentMedia.getType()==0)
-                    {
+                    indicator.setText(String.format(Locale.getDefault(), "%d ==> %d", turn + 1, mediaList.size()));
+                    if (currentMedia.getType() == 0) {
                         imageStart();
-                        downloadHotspots(currentMedia.getId());
-                    }
-                    else{
+                        downloadHotspots(currentMedia.getId(), currentMedia.getKey());
+                    } else {
                         videoStart();
                         Intent mServiceIntent = new Intent(getBaseContext(), VideoDownloadService.class);
-                        mServiceIntent.putExtra(URL,currentMedia.getLink());
+                        mServiceIntent.putExtra(URL, currentMedia.getLink());
                         mServiceIntent.putExtra(ID, currentMedia.getId());
                         startService(mServiceIntent);
-                        isReady=true;
+                        isReady = true;
                     }
                     MDVRLibrary library = getmVRLibrary();
                     library.notifyPlayerChanged();
-                    if (mMediaPlayerWrapper!=null)
-                    {
-                        if(mMediaPlayerWrapper.getPlayer().isPlaying())
-                        getPlayer().pause();
+                    if (mMediaPlayerWrapper != null) {
+                        if (mMediaPlayerWrapper.getPlayer().isPlaying())
+                            getPlayer().pause();
                     }
                     updateRightLeft();
                 }
@@ -549,29 +514,25 @@ public class TourDetailActivity extends AppCompatActivity {
         right.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(turn<mediaList.size()-1 && !mediaList.isEmpty())
-                {
+                if (turn < mediaList.size() - 1 && !mediaList.isEmpty()) {
                     turn++;
                     currentMedia = mediaList.get(turn);
-                    indicator.setText(String.format(Locale.getDefault(),"%d ==> %d",turn+1,mediaList.size()));
-                    if (currentMedia.getType()==0)
-                    {
+                    indicator.setText(String.format(Locale.getDefault(), "%d ==> %d", turn + 1, mediaList.size()));
+                    if (currentMedia.getType() == 0) {
                         imageStart();
-                        downloadHotspots(currentMedia.getId());
-                    }
-                    else{
+                        downloadHotspots(currentMedia.getId(), currentMedia.getKey());
+                    } else {
                         videoStart();
                         Intent mServiceIntent = new Intent(getBaseContext(), VideoDownloadService.class);
-                        mServiceIntent.putExtra(URL,currentMedia.getLink());
+                        mServiceIntent.putExtra(URL, currentMedia.getLink());
                         mServiceIntent.putExtra(ID, currentMedia.getId());
                         startService(mServiceIntent);
-                        isReady=true;
+                        isReady = true;
                     }
                     MDVRLibrary library = getmVRLibrary();
                     library.notifyPlayerChanged();
-                    if (mMediaPlayerWrapper!=null)
-                    {
-                        if(mMediaPlayerWrapper.getPlayer().isPlaying())
+                    if (mMediaPlayerWrapper != null) {
+                        if (mMediaPlayerWrapper.getPlayer().isPlaying())
                             getPlayer().pause();
                     }
                     updateRightLeft();
@@ -583,7 +544,7 @@ public class TourDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //Toast.makeText(getContext(),"Book Now!",Toast.LENGTH_SHORT).show();
-                Objects.requireNonNull(getBaseContext()).startActivity(new Intent(getBaseContext(),Reserve.class));
+                Objects.requireNonNull(getBaseContext()).startActivity(new Intent(getBaseContext(), Reserve.class));
             }
         });
         addReview = findViewById(R.id.fab);
@@ -594,44 +555,41 @@ public class TourDetailActivity extends AppCompatActivity {
                         .setAction("Action", null).show();*/
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 ReviewingFragment fragment = ReviewingFragment.newInstance(tour);
-                if (fragmentManager!=null)
-                    fragment.show(fragmentManager,"reviewing");
+                if (fragmentManager != null)
+                    fragment.show(fragmentManager, "reviewing");
             }
         });
     }
-    void updateRightLeft()
-    {
-        if (turn >0)
-        {
+
+    void updateRightLeft() {
+        if (turn > 0) {
             left.setVisibility(View.VISIBLE);
-        }
-        else{
+        } else {
             left.setVisibility(View.INVISIBLE);
         }
-        if (turn == mediaList.size()-1)
-        {
+        if (turn == mediaList.size() - 1) {
             right.setVisibility(View.INVISIBLE);
-        }
-        else{
+        } else {
             right.setVisibility(View.VISIBLE);
         }
     }
-    void makeToast(View view , String text){
+
+    void makeToast(View view, String text) {
 
         int x = view.getLeft();
         int y = view.getTop();
         Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.TOP| Gravity.START, x, y);
+        toast.setGravity(Gravity.TOP | Gravity.START, x, y);
         toast.show();
     }
-    void imageStart()
-    {
-        loadingBool =true;
+
+    void imageStart() {
+        loadingBool = true;
         controllers.setVisibility(View.GONE);
         controllersLayout.setVisibility(View.INVISIBLE);
         imageView.setVisibility(View.VISIBLE);
         videoView.setVisibility(View.GONE);
-        if (mVRLibrary==null) {
+        if (mVRLibrary == null) {
             mVRLibrary = MDVRLibrary.with(this)
                     .displayMode(MDVRLibrary.DISPLAY_MODE_NORMAL)
                     .interactiveMode(MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH)
@@ -658,21 +616,18 @@ public class TourDetailActivity extends AppCompatActivity {
                     //.projectionFactory(new CustomProjectionFactory())
                     .build(imageView);
             imageView.setTag(mTarget);
-        }
-        else
-        {
+        } else {
             mVRLibrary.notifyPlayerChanged();
         }
     }
-    private void loadImage(String url, final MD360BitmapTexture.Callback callback){
+
+    private void loadImage(String url, final MD360BitmapTexture.Callback callback) {
         Log.d(TAG, "load image with max texture size:" + callback.getMaxTextureSize());
         showBusy();
-        if (mediaList.isEmpty())
-        {
+        if (mediaList.isEmpty()) {
             right.setVisibility(View.INVISIBLE);
-        }
-        else{
-            if (turn<mediaList.size()-1)
+        } else {
+            if (turn < mediaList.size() - 1)
                 right.setVisibility(View.VISIBLE);
         }
         mTarget = new Target() {
@@ -684,7 +639,7 @@ public class TourDetailActivity extends AppCompatActivity {
                 // texture
                 callback.texture(bitmap);
                 cancelBusy();
-                loadingBool=false;
+                loadingBool = false;
             }
 
             @Override
@@ -697,168 +652,63 @@ public class TourDetailActivity extends AppCompatActivity {
         };
         Picasso.with(getApplicationContext())
                 .load(url)
-                .resize(callback.getMaxTextureSize(),callback.getMaxTextureSize())
+                .resize(callback.getMaxTextureSize(), callback.getMaxTextureSize())
                 .onlyScaleDown()
                 .centerInside()
                 .memoryPolicy(NO_CACHE, NO_STORE)
                 .into(mTarget);
     }
-    public void cancelBusy(){
-        percent=0;
+
+    public void cancelBusy() {
+        percent = 0;
         progressBar.setVisibility(View.GONE);
     }
-    public void showBusy(){
-        percent=0;
+
+    public void showBusy() {
+        percent = 0;
         progressBar.setVisibility(View.VISIBLE);
         loading();
     }
-    IMediaPlayer getPlayer()
-    {
+
+    IMediaPlayer getPlayer() {
         return mMediaPlayerWrapper.getPlayer();
     }
-    void playCycle()
-    {
+
+    void playCycle() {
         seekBar.setProgress((int) getPlayer().getCurrentPosition());
-        if (getPlayer().isPlaying())
-        {
+        if (getPlayer().isPlaying()) {
             runnable = new Runnable() {
                 @Override
                 public void run() {
                     playCycle();
                 }
             };
-            handler.postDelayed(runnable,1000);
+            handler.postDelayed(runnable, 1000);
         }
     }
-    Handler loadhandler = new Handler(), handler= new Handler() ;
-    Runnable loadRunnable, runnable ;
-    int percent=0;
-    void loading()
-    {
-        percent=(percent+10)%100;
+
+    Handler loadhandler = new Handler(), handler = new Handler();
+    Runnable loadRunnable, runnable;
+    int percent = 0;
+
+    void loading() {
+        percent = (percent + 10) % 100;
         progressBar.setProgress(percent);
-        if (loadingBool)
-        {
+        if (loadingBool) {
             loadRunnable = new Runnable() {
                 @Override
                 public void run() {
                     loading();
                 }
             };
-            loadhandler.postDelayed(loadRunnable,500);
+            loadhandler.postDelayed(loadRunnable, 500);
         }
     }
-    void downloadMedia(String id)
-    {
-        Uri uri = Uri.parse(Constants.BASE+"/media_of_tour.php").buildUpon().appendQueryParameter("id",id).build();
-        StringRequestNew stringRequest = new StringRequestNew(Request.Method.GET, uri.toString(),
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Log.v("data",response);
-                        try {
-                            JSONObject o = new JSONObject(response);
-                            int suc = o.getInt("success");
-                            if (suc==1) {
-                                JSONArray arr = o.getJSONArray("medias");
-                                Media media;
-                                mediaList.clear();
-                                for (int i = 0; i < arr.length(); i++) {
-                                    JSONObject obj = (JSONObject) arr.get(i);
-                                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MMM-dd hh:mm a z", Locale.getDefault());
-                                    media = new Media();
-                                    media.setId(obj.getString("id"));
-                                    media.setLink(obj.getString("media"));
-                                    media.setName(obj.getString("name"));
-                                    media.setType(obj.getInt("type"));
-                                    mediaList.add(media);
-                                }
-                                turn = 0;
-                                if (!mediaList.isEmpty()) {
-                                    currentMedia = mediaList.get(0);
-                                    indicator.setText(String.format(Locale.getDefault(),"%d ==> %d",turn+1,mediaList.size()));
-                                    //getmVRLibrary().onResume(getBaseContext());
-                                    if (currentMedia.getType() == 0) {
-                                        imageStart();
-                                        downloadHotspots(currentMedia.getId());
-                                        mVRLibrary.notifyPlayerChanged();
-                                    } else {
-                                        videoStart();
-                                        Intent mServiceIntent = new Intent(getBaseContext(), VideoDownloadService.class);
-                                        mServiceIntent.putExtra(URL,currentMedia.getLink());
-                                        mServiceIntent.putExtra(ID, currentMedia.getId());
-                                        startService(mServiceIntent);
-                                        isReady=true;
-                                    }
-                                }
-                                else
-                                {
-                                    right.setVisibility(View.INVISIBLE);
-                                    left.setVisibility(View.INVISIBLE);
-                                }
-                                Toast.makeText(getBaseContext(), "Media links download complete!", Toast.LENGTH_SHORT).show();
-                            }
-                            else Toast.makeText(getBaseContext(), o.getString("message"), Toast.LENGTH_SHORT).show();
-                        } catch (JSONException e) {
-                            Toast.makeText(getBaseContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getBaseContext(),error.getMessage(),Toast.LENGTH_SHORT).show();
-            }
-        });
-        MyApp.getInstance().addToRequestQueue(stringRequest);
-    }
-    void downloadHotspots2(String id)
-    {
-        removePlugins();
-        Uri uri = Uri.parse(Constants.BASE+"/hotspots_of_media.php").buildUpon().appendQueryParameter("id",id).build();
-        StringRequestNew stringRequest = new StringRequestNew(Request.Method.GET, uri.toString(),
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Log.v("data",response);
-                        try {
-                            JSONObject o = new JSONObject(response);
-                            int suc = o.getInt("success");
-                            if (suc==1) {
-                                JSONArray arr = o.getJSONArray("hotspots");
-                                Hotspot hotspot;
-                                hotspots.clear();
-                                for (int i = 0; i < arr.length(); i++) {
-                                    JSONObject obj = (JSONObject) arr.get(i);
-                                    hotspot = new Hotspot(obj.getString("id")
-                                            ,obj.getString("text")
-                                            ,obj.getDouble("yaw")
-                                            ,obj.getDouble("pitch")
-                                            ,obj.getInt("type"));
-                                    addHotspot(hotspot);
-                                    hotspots.add(hotspot);
-                                }
-                                Toast.makeText(getBaseContext(), "Hotspots download complete!", Toast.LENGTH_SHORT).show();
-                            }
-                            else Toast.makeText(getBaseContext(), o.getString("message"), Toast.LENGTH_SHORT).show();
-                        } catch (JSONException e) {
-                            Toast.makeText(getBaseContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getBaseContext(),error.getMessage(),Toast.LENGTH_SHORT).show();
-            }
-        });
-        MyApp.getInstance().addToRequestQueue(stringRequest);
-    }
-    void downloadHotspots(String id)
-    {
+
+
+    void downloadHotspots(String id, String key) {
         String response = "";
-        switch (Integer.parseInt(id))
-        {
+        switch (Integer.parseInt(id)) {
             case 1:
                 response = "{\"hotspots\":[{\"id\":\"1\",\"text\":\"2\",\"yaw\":25.920267219381,\"pitch\":5.0098862414458,\"type\":1},{\"id\":\"2\",\"text\":\"3\",\"yaw\":-15.920267219381,\"pitch\":5.0098862414458,\"type\":1}],\"success\":1}";
                 break;
@@ -870,28 +720,33 @@ public class TourDetailActivity extends AppCompatActivity {
                 break;
         }
 
-        if (!response.isEmpty())
-        {
+        if (!response.isEmpty()) {
             try {
                 JSONObject o = new JSONObject(response);
                 int suc = o.getInt("success");
-                if (suc==1) {
+                if (suc == 1) {
                     JSONArray arr = o.getJSONArray("hotspots");
                     Hotspot hotspot;
                     hotspots.clear();
                     for (int i = 0; i < arr.length(); i++) {
                         JSONObject obj = (JSONObject) arr.get(i);
                         hotspot = new Hotspot(obj.getString("id")
-                                ,obj.getString("text")
-                                ,obj.getDouble("yaw")
-                                ,obj.getDouble("pitch")
-                                ,obj.getInt("type"));
+                                , obj.getString("text")
+                                , obj.getDouble("yaw")
+                                , obj.getDouble("pitch")
+                                , obj.getInt("type"));
                         addHotspot(hotspot);
                         hotspots.add(hotspot);
                     }
+//                    for (Hotspot h : hotspots) {
+//                        DatabaseReference dr = FirebaseDatabase.getInstance().getReference(StaticMembers.MEDIA)
+//                                .child(key).child(StaticMembers.HOTSPOTS).push();
+//                        dr.setValue(h);
+//                        h.setKey(dr.getKey());
+//                    }
                     Toast.makeText(getBaseContext(), "Hotspots download complete!", Toast.LENGTH_SHORT).show();
-                }
-                else Toast.makeText(getBaseContext(), o.getString("message"), Toast.LENGTH_SHORT).show();
+                } else
+                    Toast.makeText(getBaseContext(), o.getString("message"), Toast.LENGTH_SHORT).show();
             } catch (JSONException e) {
                 Toast.makeText(getBaseContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                 e.printStackTrace();
@@ -899,14 +754,14 @@ public class TourDetailActivity extends AppCompatActivity {
         }
 
     }
-    void addHotspot(final Hotspot hotspot)
-    {
-        double y = 25*Math.sin(Math.toRadians(hotspot.getPitch()));
-        double z = -25*Math.cos(Math.toRadians(hotspot.getPitch()));
-        MDPosition position =MDPosition.newInstance().setY((float)y).setZ((float)z).setYaw((float)hotspot.getPitch())
-                .setAngleY((float)(-1*(hotspot.getYaw()+90)+180));
+
+    void addHotspot(final Hotspot hotspot) {
+        double y = 25 * Math.sin(Math.toRadians(hotspot.getPitch()));
+        double z = -25 * Math.cos(Math.toRadians(hotspot.getPitch()));
+        MDPosition position = MDPosition.newInstance().setY((float) y).setZ((float) z).setYaw((float) hotspot.getPitch())
+                .setAngleY((float) (-1 * (hotspot.getYaw() + 90) + 180));
         MDHotspotBuilder builder;
-        if (hotspot.getType()==0) {
+        if (hotspot.getType() == 0) {
             builder = MDHotspotBuilder.create(mImageLoadProvider)
                     .size(4f, 4f)
                     .provider(0, this, R.drawable.sound_icon_inactive)
@@ -918,9 +773,9 @@ public class TourDetailActivity extends AppCompatActivity {
                         public void onHotspotHit(IMDHotspot hitHotspot, MDRay ray) {
                             if (hitHotspot instanceof MDWidgetPlugin) {
                                 MDWidgetPlugin widgetPlugin = (MDWidgetPlugin) hitHotspot;
-                                String s = hotspot.getText() ;
+                                String s = hotspot.getText();
                                 if (canspeak && !s.isEmpty()) {
-                                    textToSpeech.speak(s, TextToSpeech.QUEUE_FLUSH, null,null);
+                                    textToSpeech.speak(s, TextToSpeech.QUEUE_FLUSH, null, null);
                                 }
                                 widgetPlugin.setChecked(!widgetPlugin.getChecked());
                             }
@@ -930,9 +785,7 @@ public class TourDetailActivity extends AppCompatActivity {
                     .position(position)
                     .status(0, 1)
                     .checkedStatus(10, 11);
-        }
-        else
-        {
+        } else {
             builder = MDHotspotBuilder.create(mImageLoadProvider)
                     .size(4f, 4f)
                     .provider(0, this, R.drawable.panorama2incative)
@@ -944,26 +797,23 @@ public class TourDetailActivity extends AppCompatActivity {
                         public void onHotspotHit(IMDHotspot hitHotspot, MDRay ray) {
                             if (hitHotspot instanceof MDWidgetPlugin) {
                                 MDWidgetPlugin widgetPlugin = (MDWidgetPlugin) hitHotspot;
-                                if (!mediaList.isEmpty())
-                                {
-                                    for (int i = 0 ; i < mediaList.size();i++)
-                                    {
+                                if (!mediaList.isEmpty()) {
+                                    for (int i = 0; i < mediaList.size(); i++) {
                                         currentMedia = mediaList.get(i);
-                                        if (currentMedia.getId().equals(hotspot.getText()))
-                                        {
-                                            turn = i ;
-                                            downloadHotspots(currentMedia.getId());
-                                            indicator.setText(String.format(Locale.getDefault(),"%d ==> %d",turn+1,mediaList.size()));
+                                        if (currentMedia.getId().equals(hotspot.getText())) {
+                                            turn = i;
+                                            downloadHotspots(currentMedia.getId(), currentMedia.getKey());
+                                            indicator.setText(String.format(Locale.getDefault(), "%d ==> %d", turn + 1, mediaList.size()));
                                             if (currentMedia.getType() == 0) {
                                                 imageStart();
                                                 mVRLibrary.notifyPlayerChanged();
                                             } else {
                                                 videoStart();
                                                 Intent mServiceIntent = new Intent(getBaseContext(), VideoDownloadService.class);
-                                                mServiceIntent.putExtra(URL,currentMedia.getLink());
+                                                mServiceIntent.putExtra(URL, currentMedia.getLink());
                                                 mServiceIntent.putExtra(ID, currentMedia.getId());
                                                 startService(mServiceIntent);
-                                                isReady=true;
+                                                isReady = true;
                                             }
                                             updateRightLeft();
                                             break;
@@ -985,14 +835,15 @@ public class TourDetailActivity extends AppCompatActivity {
         mVRLibrary.addPlugin(plugin);
         //Toast.makeText(this, "add plugin position:" + position, Toast.LENGTH_SHORT).show();
     }
-    void removePlugins()
-    {
+
+    void removePlugins() {
         plugins.clear();
         mVRLibrary.removePlugins();
     }
-    private class ImageLoadProvider implements MDVRLibrary.IImageLoadProvider{
 
-        private SimpleArrayMap<Uri,Target> targetMap = new SimpleArrayMap<>();
+    private class ImageLoadProvider implements MDVRLibrary.IImageLoadProvider {
+
+        private SimpleArrayMap<Uri, Target> targetMap = new SimpleArrayMap<>();
 
         @Override
         public void onProvideBitmap(final Uri uri, final MD360BitmapTexture.Callback callback) {
@@ -1020,40 +871,39 @@ public class TourDetailActivity extends AppCompatActivity {
 
             Picasso.with(getApplicationContext())
                     .load(uri)
-                    .resize(callback.getMaxTextureSize(),callback.getMaxTextureSize())
+                    .resize(callback.getMaxTextureSize(), callback.getMaxTextureSize())
                     .onlyScaleDown().centerInside()
                     .memoryPolicy(NO_CACHE, NO_STORE).into(target);
         }
     }
+
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int t = intent.getIntExtra(Constants.TYPE,0);
-            if (currentMedia.getType()>0)
-            if (t==(Constants.TYPE_RESULT)&&intent.getIntExtra(Constants.RESULT,0)== Activity.RESULT_OK)
-            {
-                outFilePath = intent.getStringExtra(Constants.FILE);
-                isPlaying=true;
-                setVideoUri(outFilePath,0);
-                isReady=true;
-            }
-            else if(t==(Constants.TYPE_PROGRESS))
-            {
-                progressBar.setProgress(intent.getIntExtra(Constants.PROGRESS,0));
-                isPlaying=false;
-                isReady=false;
-            }
+            int t = intent.getIntExtra(Constants.TYPE, 0);
+            if (currentMedia.getType() > 0)
+                if (t == (Constants.TYPE_RESULT) && intent.getIntExtra(Constants.RESULT, 0) == Activity.RESULT_OK) {
+                    outFilePath = intent.getStringExtra(Constants.FILE);
+                    isPlaying = true;
+                    setVideoUri(outFilePath, 0);
+                    isReady = true;
+                } else if (t == (Constants.TYPE_PROGRESS)) {
+                    progressBar.setProgress(intent.getIntExtra(Constants.PROGRESS, 0));
+                    isPlaying = false;
+                    isReady = false;
+                }
         }
     };
+
     @Override
     protected void onPause() {
         super.onPause();
-        if (mVRLibrary!=null)
-        mVRLibrary.onPause(this);
-        if (mVideoLib!=null)
-        mVideoLib.onPause(this);
-        if (mMediaPlayerWrapper.getPlayer()!=null) {
-            IMediaPlayer player =mMediaPlayerWrapper.getPlayer();
+        if (mVRLibrary != null)
+            mVRLibrary.onPause(this);
+        if (mVideoLib != null)
+            mVideoLib.onPause(this);
+        if (mMediaPlayerWrapper.getPlayer() != null) {
+            IMediaPlayer player = mMediaPlayerWrapper.getPlayer();
             player.pause();
         }
         unregisterReceiver(broadcastReceiver);
@@ -1062,38 +912,37 @@ public class TourDetailActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (mVRLibrary!=null)
-        mVRLibrary.onResume(this);
-        if (mVideoLib!=null)
-        mVideoLib.onResume(this);
+        if (mVRLibrary != null)
+            mVRLibrary.onResume(this);
+        if (mVideoLib != null)
+            mVideoLib.onResume(this);
         playButton.setBackgroundDrawable(getResources().getDrawable(android.R.drawable.ic_media_pause));
         registerReceiver(broadcastReceiver, new IntentFilter(
                 Constants.NOTIFICATION));
-        isReady=true;
+        isReady = true;
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        if (mVRLibrary!=null)
-        mVRLibrary.onOrientationChanged(this);
-        if (mVideoLib!=null)
-        mVideoLib.onOrientationChanged(this);
+        if (mVRLibrary != null)
+            mVRLibrary.onOrientationChanged(this);
+        if (mVideoLib != null)
+            mVideoLib.onOrientationChanged(this);
     }
 
-    void setVideoUri(String uri, final long seek)
-    {
+    void setVideoUri(String uri, final long seek) {
         mMediaPlayerWrapper.openRemoteFile(uri);
         mMediaPlayerWrapper.prepare();
-        if (isPlaying){
+        if (isPlaying) {
             getPlayer().start();
         }
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (getPlayer()!=null)
-                getPlayer().seekTo(seek);
+                if (getPlayer() != null)
+                    getPlayer().seekTo(seek);
                 seekBar.setProgress((int) seek);
             }
         }, 250);
@@ -1104,37 +953,36 @@ public class TourDetailActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (currentMedia!=null)
-        {
+        if (currentMedia != null) {
 
-            outState.putParcelableArrayList(Constants.CURRRENT_MED,mediaList);
-            outState.putInt(Constants.TURN_MED,turn);
-            if (currentMedia.getType()==0)
-            {
-                outState.putParcelableArrayList(Constants.CURRRENT_HS,hotspots);
-            }
-            else
-            {
-                 outState.putLong(SEEK,getPlayer().getCurrentPosition());
-                 outState.putString(FILE,outFilePath);
+            outState.putParcelableArrayList(Constants.CURRRENT_MED, mediaList);
+            outState.putInt(Constants.TURN_MED, turn);
+            if (currentMedia.getType() == 0) {
+                outState.putParcelableArrayList(Constants.CURRRENT_HS, hotspots);
+            } else {
+                outState.putLong(SEEK, getPlayer().getCurrentPosition());
+                outState.putString(FILE, outFilePath);
             }
         }
-        isReady=false;
+        isReady = false;
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mVRLibrary!=null)
-        mVRLibrary.onDestroy();
-        if (mVideoLib!=null)
-        mVideoLib.onDestroy();
+        if (mVRLibrary != null)
+            mVRLibrary.onDestroy();
+        if (mVideoLib != null)
+            mVideoLib.onDestroy();
         mMediaPlayerWrapper.destroy();
         handler.removeCallbacks(runnable);
         loadhandler.removeCallbacks(loadRunnable);
-        if(textToSpeech!=null){
+        if (textToSpeech != null) {
             textToSpeech.stop();
-            textToSpeech.shutdown();}
+            textToSpeech.shutdown();
+        }
     }
+
     private class ViewPagerAdapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragmentList = new ArrayList<>();
         private final List<String> mFragmentTitleList = new ArrayList<>();
@@ -1163,12 +1011,13 @@ public class TourDetailActivity extends AppCompatActivity {
             return mFragmentTitleList.get(position);
         }
     }
+
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         Fragment fragment = DetailsFragment.newInstance(tour);
-        adapter.addFrag(fragment,"Details");
+        adapter.addFrag(fragment, "Details");
         fragment = PlacesFragment.newInstance(tour);
-        adapter.addFrag(fragment,"Places");
+        adapter.addFrag(fragment, "Places");
         fragment = ReviewsFragment.newInstance(tour);
         adapter.addFrag(fragment, "Reviews");
         viewPager.setAdapter(adapter);

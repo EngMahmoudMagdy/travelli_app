@@ -56,4 +56,11 @@
     <string name="reserve_name"> Name </string>
     <string name="booknow"> Book now </string>
     <string name="ok">Ok</string>
+    <string name="connection_error">Connection error</string>
+    <string name="full_name">Full name</string>
+    <string name="full_name_empty">Full name is empty</string>
+    <string name="email_empty">Email is empty</string>
+    <string name="password_empty">Password is empty</string>
+    <string name="confirm_password_empty">Confirm Password is empty</string>
+    <string name="password_doesnt_match">your passwords doesn\'t match</string>
 </resources>

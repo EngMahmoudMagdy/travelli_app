@@ -1,86 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_register"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent">
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/airport_back"
-        android:background="@color/light_grey"
+        android:layout_gravity="center"
+        android:contentDescription="@string/app_name"
         android:scaleType="centerCrop"
-        android:layout_gravity="center"/>
+        android:src="@drawable/airport_back" />
+
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <LinearLayout
+        android:layout_height="match_parent"
+        android:fillViewport="false">
+
+        <android.support.v7.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:padding="@dimen/activity_horizontal_margin"
-            android:background="@drawable/rounded"
+            android:layout_gravity="center"
             android:layout_margin="8dp"
-            >
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPersonName"
-                android:padding="10dp"
-                android:ems="10"
-                android:id="@+id/name"
-                android:hint="@string/name" />
+            app:cardBackgroundColor="@color/whiteTrans"
+            app:cardCornerRadius="@dimen/card_corner"
+            app:cardElevation="0dp"
+            app:cardPreventCornerOverlap="true"
+            app:cardUseCompatPadding="true">
 
-            <EditText
-                android:layout_marginTop="20dp"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textEmailAddress"
-                android:ems="10"
-                android:padding="10dp"
-                android:id="@+id/email"
-                android:hint="@string/email_here" />
-            <EditText
-                android:layout_marginTop="20dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="phone"
-                android:ems="10"
-                android:padding="10dp"
-                android:id="@+id/phone"
-                android:hint="@string/phone" />
-            <EditText
-                android:layout_marginTop="20dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:ems="10"
-                android:padding="10dp"
-                android:id="@+id/pass"
-                android:hint="@string/pass" />
-            <EditText
-                android:layout_marginTop="20dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:ems="10"
-                android:padding="10dp"
-                android:id="@+id/conf_pass"
-                android:imeOptions="actionDone"
-                android:hint="@string/conf_pass" />
-            <Button
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="8dp"
-                android:text="@string/register"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/register"
-                android:textColor="@android:color/white"
-                android:background="@drawable/rounded_button"
-                android:textSize="20sp" />
-        </LinearLayout>
+                android:orientation="vertical"
+                android:padding="@dimen/activity_horizontal_margin">
+
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/nameLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:hintEnabled="false">
+
+                    <android.support.design.widget.TextInputEditText
+                        android:id="@+id/name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:drawableStart="@drawable/ic_people_black_24dp"
+                        android:drawablePadding="8dp"
+                        android:hint="@string/full_name"
+                        android:inputType="textPersonName" />
+                </android.support.design.widget.TextInputLayout>
+
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/emailLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:hintEnabled="false">
+
+
+                    <android.support.design.widget.TextInputEditText
+                        android:id="@+id/email"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:drawableStart="@drawable/ic_email_black_24dp"
+                        android:drawablePadding="8dp"
+                        android:hint="@string/email_here"
+                        android:inputType="textEmailAddress" />
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/passwordLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    app:hintEnabled="false"
+                    app:passwordToggleEnabled="true">
+
+
+                    <android.support.design.widget.TextInputEditText
+                        android:id="@+id/password"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:drawableStart="@drawable/lock"
+                        android:drawablePadding="8dp"
+                        android:hint="@string/pass"
+                        android:inputType="textPassword" />
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/confirmPasswordLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    app:hintEnabled="false"
+                    app:passwordToggleEnabled="true">
+
+
+                    <android.support.design.widget.TextInputEditText
+                        android:id="@+id/confirmPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:drawableStart="@drawable/lock"
+                        android:drawablePadding="8dp"
+                        android:hint="@string/conf_pass"
+                        android:imeOptions="actionDone"
+                        android:inputType="textPassword" />
+                </android.support.design.widget.TextInputLayout>
+
+                <Button
+                    android:id="@+id/register"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@drawable/rounded_button"
+                    android:text="@string/register"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
     </android.support.v4.widget.NestedScrollView>
-</FrameLayout>
+
+    <include layout="@layout/progress_layout" />
+</android.support.design.widget.CoordinatorLayout>

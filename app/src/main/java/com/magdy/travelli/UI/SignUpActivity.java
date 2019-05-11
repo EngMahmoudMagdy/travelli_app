@@ -1,123 +1,117 @@
 package com.magdy.travelli.UI;
 
-import android.content.DialogInterface;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.RelativeLayout;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.toolbox.Volley;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+import com.magdy.travelli.Data.User;
 import com.magdy.travelli.R;
-import com.magdy.travelli.Services.RegisterRequest;
+import com.magdy.travelli.helpers.PrefManager;
+import com.magdy.travelli.helpers.StaticMembers;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class SignUpActivity extends AppCompatActivity {
+
+    @BindView(R.id.email)
+    TextInputEditText emailText;
+    @BindView(R.id.emailLayout)
+    TextInputLayout emailLayout;
+    @BindView(R.id.name)
+    TextInputEditText nameText;
+    @BindView(R.id.nameLayout)
+    TextInputLayout nameLayout;
+    @BindView(R.id.password)
+    TextInputEditText passwordText;
+    @BindView(R.id.passwordLayout)
+    TextInputLayout passwordLayout;
+    @BindView(R.id.confirmPassword)
+    TextInputEditText confirmPassword;
+    @BindView(R.id.confirmPasswordLayout)
+    TextInputLayout confirmPasswordLayout;
+    @BindView(R.id.progress)
+    RelativeLayout progress;
+    String instanceId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
-
-        final EditText etusername = findViewById(R.id.name);
-        final EditText etemail = findViewById(R.id.email);
-        final EditText etphone = findViewById(R.id.phone);
-        final EditText etpassword = findViewById(R.id.pass);
-        final EditText etconfirm = findViewById(R.id.conf_pass);
-
-        final Button bsignup = findViewById(R.id.register);
-        bsignup.setOnClickListener(new View.OnClickListener() {
+        ButterKnife.bind(this);
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
             @Override
-            public void onClick(View v) {
-
-                final String name = etusername.getText().toString();
-                final String email = etemail.getText().toString();
-                final String phone = etphone.getText().toString();
-                final String password = etpassword.getText().toString();
-                final String confirm = etconfirm.getText().toString();
-                if (name.equals("") || email.equals("") || password.equals("") || confirm.equals("")) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(SignUpActivity.this);
-                    builder.setMessage("please fill the required data");
-                    builder.setNegativeButton("Retry", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    });
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                } else if (!password.equals(confirm)) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(SignUpActivity.this);
-                    builder.setMessage("your passwords doesnot match").setNegativeButton("Retry", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            etpassword.setText("");
-                            etconfirm.setText("");
-                        }
-                    }).create().show();
-
-                }
-
-                /*else{
-                    final Response.Listener<String> responseListener = new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-
-                            try {
-                                JSONObject jsonResponse = new JSONObject(response);
-
-                                boolean  code = jsonResponse.getBoolean("success");
-                                String msg = jsonResponse.getString("message");
-
-                                if (code) {
-                                    //Intent intent = new Intent(signup.this, MainActivity.class);
-                                    // signup.this.startActivity(intent);
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(getBaseContext());
-                                    builder.setMessage(msg).setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            finish();
-
-                                        }
-                                    }).create().show();
-
-
-
-                                } else {
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(getBaseContext());
-                                    builder.setMessage(msg).setNegativeButton("Retry", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            etusername.setText("");
-                                            etemail.setText("");
-                                            etphone.setText("");
-                                            etpassword.setText("");
-                                            etconfirm.setText("");
-                                        }
-                                    }).create().show();
-
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-
-
-                        }
-                    };
-
-                    RegisterRequest registerRequest = new RegisterRequest(name, email, phone, password, responseListener);
-                    MyApp.getInstance().addToRequestQueue(registerRequest);
-
-                }*/
-
-
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                instanceId = instanceIdResult.getToken();
             }
         });
+        if (instanceId == null)
+            instanceId = FirebaseInstanceId.getInstance().getToken();
+        else if (instanceId.isEmpty())
+            instanceId = FirebaseInstanceId.getInstance().getToken();
 
+        final Button signup = findViewById(R.id.register);
+        signup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (StaticMembers.CheckTextInputEditText(emailText, emailLayout, getString(R.string.email_empty)) &&
+                        StaticMembers.CheckTextInputEditText(nameText, nameLayout, getString(R.string.full_name_empty)) &&
+                        StaticMembers.CheckTextInputEditText(passwordText, passwordLayout, getString(R.string.password_empty)) &&
+                        StaticMembers.CheckTextInputEditText(confirmPassword, confirmPasswordLayout, getString(R.string.confirm_password_empty))) {
+                    final String name = nameText.getText().toString();
+                    final String email = emailText.getText().toString();
+                    final String password = passwordText.getText().toString();
+                    final String confirm = confirmPassword.getText().toString();
+                    if (!password.equals(confirm)) {
+                        StaticMembers.toastMessageShort(getBaseContext(), R.string.password_doesnt_match);
+                        return;
+                    }
+                    progress.setVisibility(View.VISIBLE);
+                    FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                User user = new User(name, email, instanceId);
+                                PrefManager.getInstance(getBaseContext()).setObject(StaticMembers.USER, user);
+                                signUp(user);
+                            } else {
+                                progress.setVisibility(View.GONE);
+                                StaticMembers.toastMessageShort(getBaseContext(), task.getException() != null ?
+                                        task.getException().getLocalizedMessage() : getString(R.string.connection_error));
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    void signUp(User user) {
+        if (FirebaseAuth.getInstance().getUid() != null)
+            FirebaseDatabase.getInstance().getReference(StaticMembers.USERS).child(FirebaseAuth.getInstance().getUid())
+                    .setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    StaticMembers.startActivityOverAll(SignUpActivity.this, MainActivity.class);
+                    progress.setVisibility(View.GONE);
+                }
+            });
+        else {
+            progress.setVisibility(View.GONE);
+            StaticMembers.startActivityOverAll(SignUpActivity.this, MainActivity.class);
+        }
     }
 }

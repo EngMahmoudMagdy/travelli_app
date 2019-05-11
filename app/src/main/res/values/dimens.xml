@@ -5,4 +5,8 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="circleProgressRadius">30dp</dimen>
     <dimen name="circleProgressThickness">7dp</dimen>
+    <dimen name="card_corner">8dp</dimen>
+    <dimen name="text_big">20sp</dimen>
+    <dimen name="text_small">14sp</dimen>
+    <dimen name="card_corner_small">4dp</dimen>
 </resources>

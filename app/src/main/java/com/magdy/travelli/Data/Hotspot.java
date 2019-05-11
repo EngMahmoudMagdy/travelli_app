@@ -4,18 +4,18 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Hotspot implements Parcelable {
-    private String id, text ;
-    private double yaw , pitch;
+    private String id, text, key;
+    private double yaw, pitch;
     private int type;
 
-    public Hotspot(String id,String text ,double yaw,double pitch,int type  )
-    {
+    public Hotspot(String id, String text, double yaw, double pitch, int type) {
         this.id = id;
         this.text = text;
         this.yaw = yaw;
         this.pitch = pitch;
-        this.type = type ;
+        this.type = type;
     }
+
     public void setId(String id) {
         this.id = id;
     }
@@ -55,13 +55,22 @@ public class Hotspot implements Parcelable {
     public String getText() {
         return text;
     }
-    private Hotspot(Parcel in)
-    {
-        id  = in.readString();
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    private Hotspot(Parcel in) {
+        id = in.readString();
         text = in.readString();
         yaw = in.readDouble();
         pitch = in.readDouble();
         type = in.readInt();
+        key = in.readString();
     }
 
     @Override
@@ -76,11 +85,14 @@ public class Hotspot implements Parcelable {
         dest.writeDouble(yaw);
         dest.writeDouble(pitch);
         dest.writeInt(type);
+        dest.writeString(key);
     }
+
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         public Hotspot createFromParcel(Parcel in) {
             return new Hotspot(in);
         }
+
         public Hotspot[] newArray(int size) {
             return new Hotspot[size];
         }

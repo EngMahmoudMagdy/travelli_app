@@ -1,85 +1,108 @@
 package com.magdy.travelli.UI;
 
 import android.content.Intent;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.RelativeLayout;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.toolbox.Volley;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.magdy.travelli.R;
-import com.magdy.travelli.Services.LoginRequest;
+import com.magdy.travelli.helpers.StaticMembers;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+import static com.magdy.travelli.helpers.StaticMembers.TOKEN;
 
 public class SignInActivity extends AppCompatActivity {
+
+    @BindView(R.id.email)
+    TextInputEditText emailText;
+    @BindView(R.id.emailLayout)
+    TextInputLayout emailLayout;
+    @BindView(R.id.password)
+    TextInputEditText passwordText;
+    @BindView(R.id.passwordLayout)
+    TextInputLayout passwordLayout;
+    @BindView(R.id.progress)
+    RelativeLayout progress;
+    String instanceId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
+        ButterKnife.bind(this);
+        final Button login = findViewById(R.id.login);
+        final Button signuplink = findViewById(R.id.signup);
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                instanceId = instanceIdResult.getToken();
+            }
+        });
+        if (instanceId == null)
+            instanceId = FirebaseInstanceId.getInstance().getToken();
+        else if (instanceId.isEmpty())
+            instanceId = FirebaseInstanceId.getInstance().getToken();
 
-        final EditText etlmailorphone=findViewById(R.id.emailText);
-        final EditText etlpassword=findViewById(R.id.passwordText);
-        final Button login=findViewById(R.id.login);
-        final Button signuplink =findViewById(R.id.signup);
         signuplink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                Intent signupIntent =new Intent(getBaseContext(),SignUpActivity.class);
-                startActivity(signupIntent);
-
+                startActivity(new Intent(getBaseContext(), SignUpActivity.class));
             }
         });
 
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final String mailorphone = etlmailorphone.getText().toString();
-                final String password =etlpassword.getText().toString();
-
-                /*Response.Listener<String> responseListener = new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONObject jsonresponse = new JSONObject(response);
-                            boolean success = jsonresponse.getBoolean("success");
-
-                            if(success){
-                                String name=jsonresponse.getString("name");
-                                String userID=jsonresponse.getString("id");
-                                String email =jsonresponse.getString("email");
-                                String phone =jsonresponse.getString("phone_num");
-
-                                Intent intent=new Intent(getBaseContext(),SignInActivity.class);
-                                intent.putExtra("name",name);
-                                intent.putExtra("id",userID);
-                                intent.putExtra("email",email);
-                                intent.putExtra("phone_num",phone);
-                                startActivity(intent);
-
-                            }else{
-                                etlmailorphone.setText("");
-                                etlpassword.setText("");
-                                AlertDialog.Builder builder = new AlertDialog.Builder(getBaseContext());
-                                builder.setMessage("Login failed").setNegativeButton("Retry", null).create().show();
+                if (StaticMembers.CheckTextInputEditText(emailText, emailLayout, "Email is empty") &&
+                        StaticMembers.CheckTextInputEditText(passwordText, passwordLayout, "Password is empty")) {
+                    progress.setVisibility(View.VISIBLE);
+                    final String email = emailText.getText().toString();
+                    final String password = passwordText.getText().toString();
+                    FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                changeToken(instanceId);
+                            } else {
+                                progress.setVisibility(View.GONE);
+                                StaticMembers.toastMessageShort(getBaseContext(), task.getException() != null ?
+                                        task.getException().getLocalizedMessage() : getString(R.string.connection_error));
                             }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
                         }
-                    }
-                };
-
-                LoginRequest loginRequest=new LoginRequest(mailorphone,password,responseListener);
-                RequestQueue queue = Volley.newRequestQueue(getBaseContext());
-                queue.add(loginRequest);*/
-        }
+                    });
+                }
+            }
         });
+    }
+
+    void changeToken(String token) {
+        if (FirebaseAuth.getInstance().getUid() != null)
+            FirebaseDatabase.getInstance().getReference(StaticMembers.USERS).child(FirebaseAuth.getInstance().getUid())
+                    .child(TOKEN).setValue(token).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    StaticMembers.startActivityOverAll(SignInActivity.this, MainActivity.class);
+                    progress.setVisibility(View.GONE);
+                }
+            });
+        else {
+            progress.setVisibility(View.GONE);
+            StaticMembers.startActivityOverAll(SignInActivity.this, MainActivity.class);
+        }
     }
 }
