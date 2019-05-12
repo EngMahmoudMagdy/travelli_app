@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
@@ -35,10 +36,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.asha.vrlib.MD360Director;
 import com.asha.vrlib.MD360DirectorFactory;
@@ -53,8 +51,10 @@ import com.asha.vrlib.plugins.MDWidgetPlugin;
 import com.asha.vrlib.plugins.hotspot.IMDHotspot;
 import com.asha.vrlib.texture.MD360BitmapTexture;
 import com.google.android.apps.muzei.render.GLTextureView;
-import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.magdy.travelli.Adapters.CustomProjectionFactory;
 import com.magdy.travelli.Adapters.MediaPlayerWrapper;
 import com.magdy.travelli.Data.Constants;
@@ -62,7 +62,6 @@ import com.magdy.travelli.Data.Hotspot;
 import com.magdy.travelli.Data.Media;
 import com.magdy.travelli.Data.Tour;
 import com.magdy.travelli.R;
-import com.magdy.travelli.Services.StringRequestNew;
 import com.magdy.travelli.Services.VideoDownloadService;
 import com.magdy.travelli.helpers.StaticMembers;
 import com.squareup.picasso.Picasso;
@@ -72,7 +71,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -101,7 +99,7 @@ public class TourDetailActivity extends AppCompatActivity {
     private FrameLayout controllersLayout;
     FloatingActionButton reserve, addReview;
     AppCompatImageButton right, left;
-    private Target mTarget, scndTarget;
+    private Target mTarget;
     Tour tour;
     private GLTextureView imageView, videoView;
     String outFilePath;
@@ -155,30 +153,15 @@ public class TourDetailActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             mediaList = new ArrayList<>();
             //downloadMedia(tour.getId());
-            String response = "{\"medias\":[{\"id\":\"3\",\"media\":\"http:\\/\\/www.mediafire.com\\/convkey\\/0e8a\\/2h1umltmsuyvr5hzg.jpg\",\"name\":\"coptic musuem 2\",\"type\":0},{\"id\":\"2\",\"media\":\"http:\\/\\/www.mediafire.com\\/convkey\\/cd07\\/mscgjaxdxnv2a68zg.jpg\",\"name\":\"religion complex\",\"type\":0},{\"id\":\"1\",\"media\":\"http:\\/\\/www.mediafire.com\\/convkey\\/4dfd\\/svg58lcaz05uzjizg.jpg\",\"name\":\"coptic museum 1\",\"type\":0},{\"id\":\"5\",\"media\":\"https:\\/\\/pannellum.org\\/images\\/video\\/jfk.mp4\",\"name\":\"The airport\",\"type\":1}],\"success\":1}";
-            try {
-                JSONObject o = new JSONObject(response);
-                int suc = o.getInt("success");
-                if (suc == 1) {
-                    JSONArray arr = o.getJSONArray("medias");
-                    Media media;
+            FirebaseDatabase.getInstance().getReference(StaticMembers.MEDIA).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     mediaList.clear();
-                    for (int i = 0; i < arr.length(); i++) {
-                        JSONObject obj = (JSONObject) arr.get(i);
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MMM-dd hh:mm a z", Locale.getDefault());
-                        media = new Media();
-                        media.setId(obj.getString("id"));
-                        media.setLink(obj.getString("media"));
-                        media.setName(obj.getString("name"));
-                        media.setType(obj.getInt("type"));
-
-                        mediaList.add(media);
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        Media media = snapshot.getValue(Media.class);
+                        if (media != null)
+                            mediaList.add(media);
                     }
-                    /*for (Media m : mediaList) {
-                        DatabaseReference dr = FirebaseDatabase.getInstance().getReference(StaticMembers.MEDIA).push();
-                        dr.setValue(m);
-                        m.setKey(dr.getKey());
-                    }*/
                     turn = 0;
                     if (!mediaList.isEmpty()) {
                         currentMedia = mediaList.get(0);
@@ -201,12 +184,13 @@ public class TourDetailActivity extends AppCompatActivity {
                         left.setVisibility(View.INVISIBLE);
                     }
                     Toast.makeText(getBaseContext(), "Media links download complete!", Toast.LENGTH_SHORT).show();
-                } else
-                    Toast.makeText(getBaseContext(), o.getString("message"), Toast.LENGTH_SHORT).show();
-            } catch (JSONException e) {
-                Toast.makeText(getBaseContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
-                e.printStackTrace();
-            }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
         } else {
             mediaList = savedInstanceState.getParcelableArrayList(Constants.CURRRENT_MED);
             turn = savedInstanceState.getInt(Constants.TURN_MED);
@@ -366,7 +350,7 @@ public class TourDetailActivity extends AppCompatActivity {
 
             }
         });
-        videoView.setTag(scndTarget);
+        videoView.setTag("Video");
     }
 
     void buttonsInit() {

@@ -10,27 +10,34 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.andexert.library.RippleView;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.like.LikeButton;
 import com.like.OnLikeListener;
 import com.magdy.travelli.Data.Tour;
 import com.magdy.travelli.R;
 import com.magdy.travelli.TourInfoListener;
+import com.magdy.travelli.helpers.StaticMembers;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 import java.util.Locale;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 
 public class TourRecyclerAdapter extends RecyclerView.Adapter<TourRecyclerAdapter.ViewHolder> {
     private Context context;
     private List<Tour> list;
     private TourInfoListener listener;
+    private DatabaseReference dbRef;
 
     public TourRecyclerAdapter(Context context, List<Tour> tours, TourInfoListener listener) {
         this.context = context;
         this.list = tours;
         this.listener = listener;
+        dbRef = FirebaseDatabase.getInstance().getReference(StaticMembers.TOURS);
     }
 
     @NonNull
@@ -51,17 +58,26 @@ public class TourRecyclerAdapter extends RecyclerView.Adapter<TourRecyclerAdapte
         holder.wishList.setOnLikeListener(new OnLikeListener() {
             @Override
             public void liked(LikeButton likeButton) {
-
+                dbRef.child(tour.getKey()).child(StaticMembers.FAV).setValue(true);
             }
 
             @Override
             public void unLiked(LikeButton likeButton) {
-
+                dbRef.child(tour.getKey()).child(StaticMembers.FAV).setValue(false);
+            }
+        });
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.setSelected(tour);
             }
         });
         holder.ratingBar.setRating(tour.getRate());
         holder.reviewers.setText(String.format(Locale.getDefault(), "(%d)", tour.getReviewers()));
-        holder.fromto.setText(String.format(Locale.US, "from %s", tour.getFrom()));
+        holder.fromto.setText(String.format(Locale.getDefault(), context.getString(R.string.from_to),
+                StaticMembers.changeDateFromIsoToView(tour.getFrom()),
+                StaticMembers.changeDateFromIsoToView(tour.getTo())));
+
     }
 
     @Override
@@ -70,22 +86,27 @@ public class TourRecyclerAdapter extends RecyclerView.Adapter<TourRecyclerAdapte
     }
 
 
-    class ViewHolder extends RecyclerView.ViewHolder {
-        private AppCompatImageView image;
-        private TextView name, description, reviewers, fromto, price;
-        private AppCompatRatingBar ratingBar;
-        private LikeButton wishList;
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.image)
+        AppCompatImageView image;
+        @BindView(R.id.name)
+        TextView name;
+        @BindView(R.id.description)
+        TextView description;
+        @BindView(R.id.noOfReviews)
+        TextView reviewers;
+        @BindView(R.id.from_to)
+        TextView fromto;
+        @BindView(R.id.price)
+        TextView price;
+        @BindView(R.id.ratingBar)
+        AppCompatRatingBar ratingBar;
+        @BindView(R.id.wishList)
+        LikeButton wishList;
 
         ViewHolder(View itemView) {
             super(itemView);
-            image = itemView.findViewById(R.id.image);
-            name = itemView.findViewById(R.id.name);
-            ratingBar = itemView.findViewById(R.id.ratingBar);
-            reviewers = itemView.findViewById(R.id.noOfReviews);
-            description = itemView.findViewById(R.id.description);
-            wishList = itemView.findViewById(R.id.wishList);
-            price = itemView.findViewById(R.id.price);
-            fromto = itemView.findViewById(R.id.from_to);
+            ButterKnife.bind(this, itemView);
         }
     }
 }

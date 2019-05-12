@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
@@ -14,6 +15,8 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 public class StaticMembers {
@@ -23,6 +26,9 @@ public class StaticMembers {
     public static final String TOURS = "tours";
     public static final String MEDIA = "media";
     public static final String HOTSPOTS = "hotspots";
+    public static final String FAV = "fav";
+    public static final String ISO_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
+    public static final String DATE_FORMAT_VIEW = "yyyy-M-dd hh:mm";
     private static final String LANGUAGE = "language";
     public static final String EMAIL = "email";
     public static final String PASSWORD = "password";
@@ -31,6 +37,47 @@ public class StaticMembers {
     public static final String ADDRESS = "address";
     public static final String TOKEN = "token";
     public static final String PAGE = "page";
+
+
+    /////////////////////////////combine bitmaps///////////////////
+    /*
+    *
+Bitmap result = Bitmap.createBitmap(firstImage.getWidth(), firstImage.getHeight(), firstImage.getConfig());
+Canvas canvas = new Canvas(result);
+canvas.drawBitmap(firstImage, 0f, 0f, null);
+canvas.drawBitmap(secondImage, 10, 10, null);
+return result;*/
+
+    public Bitmap[][] splitBitmap(Bitmap bitmap, int xCount, int yCount) {
+        // Allocate a two dimensional array to hold the individual images.
+        Bitmap[][] bitmaps = new Bitmap[xCount][yCount];
+        int width, height;
+        // Divide the original bitmap width by the desired vertical column count
+        width = bitmap.getWidth() / xCount;
+        // Divide the original bitmap height by the desired horizontal row count
+        height = bitmap.getHeight() / yCount;
+        // Loop the array and create bitmaps for each coordinate
+        for (int x = 0; x < xCount; ++x) {
+            for (int y = 0; y < yCount; ++y) {
+                // Create the sliced bitmap
+                bitmaps[x][y] = Bitmap.createBitmap(bitmap, x * width, y * height, width, height);
+            }
+        }
+        // Return the array
+        return bitmaps;
+    }
+
+    /////////////////Dates converter/////////////////////
+    public static String changeDateFromIsoToView(String dateFrom) {
+        SimpleDateFormat sdf = new SimpleDateFormat(StaticMembers.ISO_DATE_FORMAT, Locale.US);
+        SimpleDateFormat sdfTo = new SimpleDateFormat(StaticMembers.DATE_FORMAT_VIEW, Locale.getDefault());
+        try {
+            return sdfTo.format(sdf.parse(dateFrom));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return dateFrom;
+    }
 
     public static <T extends Activity> void startActivityOverAll(T activity, Class<?> destinationActivity) {
         Intent intent = new Intent(activity, destinationActivity);

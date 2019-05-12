@@ -82,6 +82,7 @@ public class ToursFragment extends Fragment implements TourInfoListener {
     void getTours() {
         shimmer.startShimmerAnimation();
         shimmer.setVisibility(View.VISIBLE);
+        tourRecycler.setVisibility(View.INVISIBLE);
         swipeRefreshLayout.setRefreshing(true);
         FirebaseDatabase.getInstance().getReference(TOURS).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -95,6 +96,7 @@ public class ToursFragment extends Fragment implements TourInfoListener {
                     }
                 }
                 adapter.notifyDataSetChanged();
+                tourRecycler.setVisibility(View.VISIBLE);
                 shimmer.stopShimmerAnimation();
                 shimmer.setVisibility(View.GONE);
                 swipeRefreshLayout.setRefreshing(false);
@@ -104,6 +106,7 @@ public class ToursFragment extends Fragment implements TourInfoListener {
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 shimmer.stopShimmerAnimation();
                 shimmer.setVisibility(View.GONE);
+                tourRecycler.setVisibility(View.VISIBLE);
                 swipeRefreshLayout.setRefreshing(false);
             }
         });
@@ -131,6 +134,5 @@ public class ToursFragment extends Fragment implements TourInfoListener {
         Intent i = new Intent(getContext(), TourDetailActivity.class);
         i.putExtra(Constants.TOUR, tour);
         startActivity(i);
-        //Toast.makeText(getContext(),tour.getName()+"\n"+tour.getDetials(),Toast.LENGTH_SHORT).show();
     }
 }

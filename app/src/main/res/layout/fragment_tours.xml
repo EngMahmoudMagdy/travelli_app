@@ -37,5 +37,6 @@
             app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
     </android.support.v4.widget.SwipeRefreshLayout>
 
+
     <include layout="@layout/progress_layout" />
 </android.support.design.widget.CoordinatorLayout>

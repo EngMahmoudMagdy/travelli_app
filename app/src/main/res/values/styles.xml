@@ -16,11 +16,12 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
-    <style name="Base.Widget.Design.TabLayoutNew" parent="android:Widget" >
+    <style name="Base.Widget.Design.TabLayoutNew" parent="android:Widget">
         <item name="tabIndicatorColor">@color/grey</item>
         <item name="tabTextColor">@color/grey</item>
         <item name="tabSelectedTextColor">@android:color/white</item>
     </style>
+
     <style name="MyToolbar" parent="@style/ThemeOverlay.AppCompat">
         <!-- Title text -->
         <item name="android:textColorPrimary">@android:color/white</item>
@@ -42,6 +43,7 @@
         <item name="spinBars">true</item>
         <item name="color">@android:color/white</item>
     </style>
+
     <style name="MaterialSearch" parent="@android:style/Theme.Dialog">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
@@ -54,6 +56,24 @@
     <style name="RatingBar" parent="Theme.AppCompat">
         <item name="colorControlActivated">@color/yellow</item>
         <item name="colorControlNormal">@color/duskYellow</item>
+    </style>
+
+    <style name="smallRatingBar" parent="android:style/Widget.Material.RatingBar.Small">
+        <item name="android:numStars">5</item>
+        <item name="android:stepSize">.1</item>
+    </style>
+
+    <style name="Clickable">
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="LayoutClickable" parent="Clickable">
+        <item name="android:background">?selectableItemBackground</item>
+    </style>
+
+    <style name="CardClickable" parent="Clickable">
+        <item name="android:foreground">?selectableItemBackground</item>
     </style>
 
 
