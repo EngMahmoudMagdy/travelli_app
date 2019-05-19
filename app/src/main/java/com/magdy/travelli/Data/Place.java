@@ -3,6 +3,15 @@ package com.magdy.travelli.Data;
 import java.io.Serializable;
 
 public class Place implements Serializable {
+    String key;
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
 
     @com.google.gson.annotations.SerializedName("id")
     public void setId(String id) {
