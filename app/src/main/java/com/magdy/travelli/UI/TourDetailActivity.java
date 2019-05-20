@@ -158,7 +158,9 @@ public class TourDetailActivity extends AppCompatActivity {
                 DataSnapshot tourSnapshot = root.child(TOURS).child(tour.getKey());
                 mediaList.clear();
                 for (DataSnapshot placeSnapShot : tourSnapshot.child(PLACES).getChildren()) {
-                    for (DataSnapshot mediaSnapShot : placeSnapShot.child(MEDIA).getChildren()) {
+                    String placeString = placeSnapShot.getValue(String.class);
+                    if (placeString != null)
+                    for (DataSnapshot mediaSnapShot : root.child(PLACES).child(placeString).child(MEDIA).getChildren()) {
                         String mediaKey = mediaSnapShot.getValue(String.class);
                         if (mediaKey != null) {
                             Media media = root.child(MEDIA).child(mediaKey).getValue(Media.class);
