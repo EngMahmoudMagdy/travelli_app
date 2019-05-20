@@ -8,12 +8,17 @@ import android.graphics.Bitmap;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.magdy.travelli.R;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -38,7 +43,23 @@ public class StaticMembers {
     public static final String TOKEN = "token";
     public static final String PAGE = "page";
 
+    ////////////////// change Dots////////////////////
+    public static void changeDots(int currentPage, int count, LinearLayout dotsLayout, Context context) {
+        TextView[] dots = new TextView[count];
 
+        dotsLayout.removeAllViews();
+        for (int i = 0; i < dots.length; i++) {
+            dots[i] = new TextView(context);
+            dots[i].setText(Html.fromHtml("&#8226;"));
+            dots[i].setTextSize(35);
+            dots[i].setTextColor(context.getResources().getColor(R.color.colorAccent));
+            dotsLayout.addView(dots[i]);
+        }
+
+        if (dots.length > currentPage)
+            dots[currentPage].setTextColor(context.getResources().getColor(R.color.colorPrimary));
+        dots[currentPage].setTextSize(50);
+    }
     /////////////////////////////combine bitmaps///////////////////
     /*
     *

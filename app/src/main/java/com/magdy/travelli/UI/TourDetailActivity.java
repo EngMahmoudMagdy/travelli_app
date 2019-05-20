@@ -31,6 +31,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -113,7 +114,7 @@ public class TourDetailActivity extends AppCompatActivity {
     private List<MDAbsPlugin> plugins;
     int turn = 0;
     Media currentMedia;
-    TextView indicator;
+    LinearLayout indicator;
     TextToSpeech textToSpeech;
     boolean canspeak = false;
     private ViewPager mViewPager;
@@ -165,7 +166,7 @@ public class TourDetailActivity extends AppCompatActivity {
                     turn = 0;
                     if (!mediaList.isEmpty()) {
                         currentMedia = mediaList.get(0);
-                        indicator.setText(String.format(Locale.getDefault(), "%d ==> %d", turn + 1, mediaList.size()));
+                        StaticMembers.changeDots(turn, mediaList.size(), indicator, getBaseContext());
                         //getmVRLibrary().onResume(getBaseContext());
                         if (currentMedia.getType() == 0) {
                             imageStart();
@@ -183,7 +184,6 @@ public class TourDetailActivity extends AppCompatActivity {
                         right.setVisibility(View.INVISIBLE);
                         left.setVisibility(View.INVISIBLE);
                     }
-                    Toast.makeText(getBaseContext(), "Media links download complete!", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
@@ -195,7 +195,7 @@ public class TourDetailActivity extends AppCompatActivity {
             mediaList = savedInstanceState.getParcelableArrayList(Constants.CURRRENT_MED);
             turn = savedInstanceState.getInt(Constants.TURN_MED);
             currentMedia = mediaList.get(turn);
-            indicator.setText(String.format(Locale.getDefault(), "%d ==> %d", turn + 1, mediaList.size()));
+            StaticMembers.changeDots(turn, mediaList.size(), indicator, getBaseContext());
             updateRightLeft();
             if (currentMedia.getType() > 0) {
                 outFilePath = savedInstanceState.getString(Constants.FILE);
@@ -473,7 +473,7 @@ public class TourDetailActivity extends AppCompatActivity {
                 if (turn > 0 && !mediaList.isEmpty()) {
                     turn--;
                     currentMedia = mediaList.get(turn);
-                    indicator.setText(String.format(Locale.getDefault(), "%d ==> %d", turn + 1, mediaList.size()));
+                    StaticMembers.changeDots(turn, mediaList.size(), indicator, getBaseContext());
                     if (currentMedia.getType() == 0) {
                         imageStart();
                         downloadHotspots(currentMedia.getId(), currentMedia.getKey());
@@ -501,7 +501,7 @@ public class TourDetailActivity extends AppCompatActivity {
                 if (turn < mediaList.size() - 1 && !mediaList.isEmpty()) {
                     turn++;
                     currentMedia = mediaList.get(turn);
-                    indicator.setText(String.format(Locale.getDefault(), "%d ==> %d", turn + 1, mediaList.size()));
+                    StaticMembers.changeDots(turn, mediaList.size(), indicator, getBaseContext());
                     if (currentMedia.getType() == 0) {
                         imageStart();
                         downloadHotspots(currentMedia.getId(), currentMedia.getKey());
@@ -787,7 +787,7 @@ public class TourDetailActivity extends AppCompatActivity {
                                         if (currentMedia.getId().equals(hotspot.getText())) {
                                             turn = i;
                                             downloadHotspots(currentMedia.getId(), currentMedia.getKey());
-                                            indicator.setText(String.format(Locale.getDefault(), "%d ==> %d", turn + 1, mediaList.size()));
+                                            StaticMembers.changeDots(turn, mediaList.size(), indicator, getBaseContext());
                                             if (currentMedia.getType() == 0) {
                                                 imageStart();
                                                 mVRLibrary.notifyPlayerChanged();

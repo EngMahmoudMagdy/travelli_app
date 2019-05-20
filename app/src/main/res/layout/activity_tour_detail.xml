@@ -1,186 +1,202 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.magdy.travelli.UI.TourDetailActivity">
+
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true">
+
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fitsSystemWindows="true"
             android:background="@android:color/white"
+            android:fitsSystemWindows="true"
             app:collapsedTitleTextAppearance="@android:color/white"
             app:contentScrim="?attr/colorPrimary"
             app:expandedTitleTextAppearance="@android:color/transparent"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_collapseMode="pin"
-                android:layout_gravity="top">
+                android:layout_gravity="top"
+                app:layout_collapseMode="pin">
+
                 <com.google.android.apps.muzei.render.GLTextureView
                     android:id="@+id/gl_view"
                     android:layout_width="match_parent"
-                    android:layout_height="285dp"
-                    />
+                    android:layout_height="285dp" />
+
                 <com.google.android.apps.muzei.render.GLTextureView
                     android:id="@+id/gl_video"
                     android:layout_width="match_parent"
                     android:layout_height="285dp"
-                    android:visibility="gone"
-                    />
+                    android:visibility="gone" />
+
                 <TextView
                     android:id="@+id/hotspot_point1"
-                    android:text="@string/hs"
-                    android:textColor="@android:color/white"
-                    android:layout_centerInParent="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-                <ProgressBar
-                    android:id="@+id/progress"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:indeterminate="false"
+                    android:text="@string/hs"
+                    android:textColor="@android:color/white" />
+
+                <ProgressBar
+                    android:id="@+id/progress"
                     style="@style/MyProgressBar"
-                    />
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:indeterminate="false" />
+
                 <RelativeLayout
-                    android:orientation="vertical"
+                    android:id="@+id/vr_tools"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:id="@+id/vr_tools"
-                    >
+                    android:orientation="vertical">
+
                     <FrameLayout
+                        android:id="@+id/controllerslayout"
                         android:layout_width="match_parent"
                         android:layout_height="200dp"
-                        android:id="@+id/controllerslayout"
                         android:layout_alignParentTop="true"
                         android:clickable="true"
                         android:focusable="true">
+
                         <Button
+                            android:id="@+id/playbut"
                             android:layout_width="36dp"
                             android:layout_height="36dp"
-                            android:background="@android:drawable/ic_media_play"
                             android:layout_gravity="center"
-                            android:id="@+id/playbut"/>
+                            android:background="@android:drawable/ic_media_play" />
+
                         <android.support.v7.widget.AppCompatSeekBar
+                            android:id="@+id/seekbar"
+                            style="@style/MySeekBar"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:id="@+id/seekbar"
                             android:layout_gravity="bottom"
-                            style="@style/MySeekBar"
-                            android:layout_marginBottom="5dp"
-                            />
+                            android:layout_marginBottom="5dp" />
                     </FrameLayout>
+
                     <LinearLayout
+                        android:id="@+id/vr_control"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="end"
-                        android:orientation="horizontal"
                         android:layout_below="@+id/controllerslayout"
-                        android:id="@+id/vr_control">
+                        android:gravity="end"
+                        android:orientation="horizontal">
+
                         <android.support.v7.widget.AppCompatImageButton
+                            android:id="@+id/motion_mode"
+                            style="@style/Base.Widget.AppCompat.Button.Borderless"
                             android:layout_width="50dp"
                             android:layout_height="wrap_content"
-                            android:src="@drawable/ic_touch_app_black_24dp"
-                            style="@style/Base.Widget.AppCompat.Button.Borderless"
                             android:background="?attr/selectableItemBackground"
-                            android:id="@+id/motion_mode"/>
+                            android:src="@drawable/ic_touch_app_black_24dp" />
+
                         <android.support.v7.widget.AppCompatImageButton
+                            android:id="@+id/controllers"
+                            style="@style/Base.Widget.AppCompat.Button.Borderless"
                             android:layout_width="50dp"
                             android:layout_height="wrap_content"
-                            android:src="@drawable/ic_play_arrow_black_24dp"
-                            style="@style/Base.Widget.AppCompat.Button.Borderless"
                             android:background="?attr/selectableItemBackground"
-                            android:id="@+id/controllers"/>
+                            android:src="@drawable/ic_play_arrow_black_24dp" />
+
                         <android.support.v7.widget.AppCompatImageButton
+                            android:id="@+id/vr_mode"
+                            style="@style/Base.Widget.AppCompat.Button.Borderless"
                             android:layout_width="50dp"
                             android:layout_height="wrap_content"
-                            android:src="@drawable/google_cardboard"
-                            style="@style/Base.Widget.AppCompat.Button.Borderless"
                             android:background="?attr/selectableItemBackground"
-                            android:id="@+id/vr_mode"/>
+                            android:src="@drawable/google_cardboard" />
+
                         <android.support.v7.widget.AppCompatImageButton
+                            android:id="@+id/fullscreen"
+                            style="@style/Base.Widget.AppCompat.Button.Borderless"
                             android:layout_width="50dp"
                             android:layout_height="wrap_content"
-                            android:src="@drawable/ic_fullscreen_black_24dp"
-                            style="@style/Base.Widget.AppCompat.Button.Borderless"
                             android:background="?attr/selectableItemBackground"
-                            android:id="@+id/fullscreen"/>
+                            android:src="@drawable/ic_fullscreen_black_24dp" />
                     </LinearLayout>
-                    <TextView
+
+                    <LinearLayout
                         android:id="@+id/indicator"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="4dp"
-                        android:gravity="center"
-                        android:background="@drawable/rounded"
-                        android:textColor="@android:color/black"
+                        android:layout_below="@+id/vr_control"
                         android:layout_centerHorizontal="true"
-                        android:layout_below="@+id/vr_control"/>
+                        android:background="@drawable/rounded"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:padding="4dp" />
                 </RelativeLayout>
+
                 <android.support.v7.widget.AppCompatImageButton
+                    android:id="@+id/left"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"
                     android:layout_width="75dp"
                     android:layout_height="200dp"
                     android:layout_alignParentLeft="true"
-                    android:id="@+id/left"
                     android:alpha="0.5"
-                    app:srcCompat="@drawable/ic_keyboard_arrow_left_white_24dp"
-                    style="@style/Base.Widget.AppCompat.Button.Borderless"/>
+                    app:srcCompat="@drawable/ic_keyboard_arrow_left_white_24dp" />
+
                 <android.support.v7.widget.AppCompatImageButton
+                    android:id="@+id/right"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"
                     android:layout_width="75dp"
                     android:layout_height="200dp"
                     android:layout_alignParentRight="true"
-                    android:id="@+id/right"
                     android:alpha="0.5"
-                    app:srcCompat="@drawable/ic_keyboard_arrow_right_black_24dp"
-                    style="@style/Base.Widget.AppCompat.Button.Borderless"/>
+                    app:srcCompat="@drawable/ic_keyboard_arrow_right_black_24dp" />
             </RelativeLayout>
         </android.support.design.widget.CollapsingToolbarLayout>
+
         <android.support.design.widget.TabLayout
             android:id="@+id/tabs"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            app:tabGravity="center"
             android:layout_gravity="bottom"
-            app:tabTextColor="@android:color/white"
-            app:tabIndicatorColor="@android:color/white"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            />
+            app:tabGravity="center"
+            app:tabIndicatorColor="@android:color/white"
+            app:tabTextColor="@android:color/white" />
     </android.support.design.widget.AppBarLayout>
+
     <android.support.v4.view.ViewPager
         android:id="@+id/viewpager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
     <android.support.design.widget.FloatingActionButton
+        android:id="@+id/book"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:src="@drawable/reserve"
-        android:elevation="@dimen/fab_elevation"
-        android:contentDescription="@string/reserve"
         android:layout_gravity="bottom|end"
-        app:pressedTranslationZ="@dimen/fab_press_translation_z"
-        app:fabSize="normal"
-        app:backgroundTint="@color/light_grey"
         android:layout_margin="24dp"
-        android:id="@+id/book"/>
+        android:contentDescription="@string/reserve"
+        android:elevation="@dimen/fab_elevation"
+        android:src="@drawable/reserve"
+        app:backgroundTint="@color/light_grey"
+        app:fabSize="normal"
+        app:pressedTranslationZ="@dimen/fab_press_translation_z" />
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_gravity="end|bottom"
-        android:src="@drawable/review"
         android:layout_margin="24dp"
+        android:src="@drawable/review"
         android:visibility="gone"
         app:backgroundTint="@color/light_grey"
-        app:pressedTranslationZ="@dimen/fab_press_translation_z"
-        app:fabSize="normal"/>
+        app:fabSize="normal"
+        app:pressedTranslationZ="@dimen/fab_press_translation_z" />
 </android.support.design.widget.CoordinatorLayout>
