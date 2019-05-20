@@ -1,6 +1,7 @@
 package com.magdy.travelli.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by engma on 10/4/2017.
@@ -11,6 +12,7 @@ public class Tour implements Serializable {
     private int price, reviewers;
     private float rate;
     private boolean fav;
+    private List<String> places;
 
     public Tour() {
     }
@@ -27,6 +29,14 @@ public class Tour implements Serializable {
         this.agency = agency;
         this.from = from;
         this.to = to;
+    }
+
+    public List<String> getPlaces() {
+        return places;
+    }
+
+    public void setPlaces(List<String> places) {
+        this.places = places;
     }
 
     public boolean isFav() {

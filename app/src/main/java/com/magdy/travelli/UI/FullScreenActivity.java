@@ -16,7 +16,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.util.SimpleArrayMap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Surface;
@@ -32,10 +31,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
 import com.asha.vrlib.MD360Director;
 import com.asha.vrlib.MD360DirectorFactory;
 import com.asha.vrlib.MDVRLibrary;
@@ -47,7 +42,6 @@ import com.asha.vrlib.model.MDPinchConfig;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 
@@ -62,18 +56,12 @@ import com.magdy.travelli.Adapters.MediaPlayerWrapper;
 import com.magdy.travelli.Data.Constants;
 import com.magdy.travelli.Data.Hotspot;
 import com.magdy.travelli.Data.Media;
+import com.magdy.travelli.Data.MediaListPackage;
 import com.magdy.travelli.R;
-import com.magdy.travelli.Services.StringRequestNew;
-import com.magdy.travelli.Services.VideoDownloadService;
+import com.magdy.travelli.helpers.StaticMembers;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import static com.magdy.travelli.Data.Constants.ID;
-import static com.magdy.travelli.Data.Constants.URL;
 import static com.squareup.picasso.MemoryPolicy.NO_CACHE;
 import static com.squareup.picasso.MemoryPolicy.NO_STORE;
 
@@ -85,17 +73,18 @@ public class FullScreenActivity extends AppCompatActivity {
     private ImageButton controllers;
 
     private GLSurfaceView surfaceView;
-    private MediaPlayerWrapper mMediaPlayerWrapper ;
+    private MediaPlayerWrapper mMediaPlayerWrapper;
     private MDVRLibrary.IImageLoadProvider mImageLoadProvider = new ImageLoadProvider();
 
-    private MDVRLibrary mVRLibrary ;
-    Media media ;
-    ArrayList<Media> mediaList ;
-    ArrayList<Hotspot>hotspots ;
-    private List<MDAbsPlugin> plugins ;
+    private MDVRLibrary mVRLibrary;
+    Media currentMedia;
+    MediaListPackage mediaListPackage;
+    List<Media> mediaList;
+    List<Hotspot> hotspots;
+    private List<MDAbsPlugin> plugins;
     TextView hotspot_point1, hotspot_point2;
     RelativeLayout layoutProgress2;
-    ProgressBar circleProgress1 , circleProgress2;
+    ProgressBar circleProgress1, circleProgress2;
     ImageButton vr;
     private boolean loadingBool;
     private Target mTarget;
@@ -113,8 +102,8 @@ public class FullScreenActivity extends AppCompatActivity {
         surfaceView = findViewById(R.id.gl_view);
         progressBar = findViewById(R.id.progress);
         seekBar = findViewById(R.id.seekbar);
-        hotspot_point1= findViewById(R.id.hotspot_point1);
-        hotspot_point2= findViewById(R.id.hotspot_point2);
+        hotspot_point1 = findViewById(R.id.hotspot_point1);
+        hotspot_point2 = findViewById(R.id.hotspot_point2);
         circleProgress1 = findViewById(R.id.circle_progress_bar1);
         circleProgress2 = findViewById(R.id.circle_progress_bar2);
         layoutProgress2 = findViewById(R.id.progress_layout2);
@@ -126,52 +115,46 @@ public class FullScreenActivity extends AppCompatActivity {
         textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
-                if(status == TextToSpeech.SUCCESS)
-                {
+                if (status == TextToSpeech.SUCCESS) {
                     int result = textToSpeech.setLanguage(Locale.US);
-                    if (result == TextToSpeech.LANG_MISSING_DATA||result == TextToSpeech.LANG_NOT_SUPPORTED)
-                    {
-                        Toast.makeText(getBaseContext(),"Not supported",Toast.LENGTH_SHORT).show();
+                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        Toast.makeText(getBaseContext(), "Not supported", Toast.LENGTH_SHORT).show();
+                    } else {
+                        canspeak = true;
                     }
-                    else {
-                        canspeak=true;
-                    }
-                }
-                else {
-                    Toast.makeText(getBaseContext(),"Init failed",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getBaseContext(), "Init failed", Toast.LENGTH_SHORT).show();
                 }
             }
         });
         assert getIntent().getExtras() != null;
-        media = getIntent().getParcelableExtra(Constants.CURRRENT_MED);
-        mediaList = getIntent().getParcelableArrayListExtra(Constants.ALLMED);
+        mediaListPackage = getIntent().getParcelableExtra(StaticMembers.MEDIA_LIST);
+        currentMedia = getIntent().getParcelableExtra(Constants.CURRRENT_MED);
+        mediaList = mediaListPackage.getMediaList();
         buttonInit();
-        if (media.getType() == 0)
-        {
-            hotspots = getIntent().getParcelableArrayListExtra(Constants.CURRRENT_HS);
+        if (currentMedia.getType() == 0) {
+            hotspots = currentMedia.getHotspots();
             imageStart();
-            downloadHotspots(media.getId());
-        }
-        else
-        {
+            changeHotspots();
+        } else {
             videoStart();
-            if (getIntent().getBooleanExtra(Constants.ISREADY,false)) {
-                setVideoUri(getIntent().getStringExtra(Constants.URL),getIntent().getLongExtra(Constants.SEEK,100));
+            if (getIntent().getBooleanExtra(Constants.ISREADY, false)) {
+                setVideoUri(getIntent().getStringExtra(Constants.URL), getIntent().getLongExtra(Constants.SEEK, 100));
             }
         }
-        final LinearLayout progresses =findViewById(R.id.progresses);
+        final LinearLayout progresses = findViewById(R.id.progresses);
         mVRLibrary.setEyePickChangedListener(new MDVRLibrary.IEyePickListener2() {
             @Override
             public void onHotspotHit(MDHitEvent hitEvent) {
                 IMDHotspot hotspot = hitEvent.getHotspot();
                 long hitTimestamp = hitEvent.getTimestamp();
                 progresses.setVisibility(View.GONE);
-                if(hotspot!=null) {
+                if (hotspot != null) {
                     progresses.setVisibility(View.VISIBLE);
-                    float p = ((float)(System.currentTimeMillis() - hitTimestamp)/3000)*100;
-                    layoutProgress2.setVisibility(mVRLibrary.getDisplayMode() == MDVRLibrary.DISPLAY_MODE_NORMAL?View.GONE:View.VISIBLE);
-                    circleProgress1.setProgress((int)p);
-                    circleProgress2.setProgress((int)p);
+                    float p = ((float) (System.currentTimeMillis() - hitTimestamp) / 3000) * 100;
+                    layoutProgress2.setVisibility(mVRLibrary.getDisplayMode() == MDVRLibrary.DISPLAY_MODE_NORMAL ? View.GONE : View.VISIBLE);
+                    circleProgress1.setProgress((int) p);
+                    circleProgress2.setProgress((int) p);
                     Hotspot data = hotspots.get(Integer.parseInt(hotspot.getTitle()));
                     if (System.currentTimeMillis() - hitTimestamp > 3000) {
 
@@ -183,10 +166,10 @@ public class FullScreenActivity extends AppCompatActivity {
                         } else {
                             if (!mediaList.isEmpty()) {
                                 for (int i = 0; i < mediaList.size(); i++) {
-                                    media = mediaList.get(i);
-                                    if (media.getId().equals(data.getText())) {
-                                        downloadHotspots(media.getId());
-                                        if (media.getType() == 0) {
+                                    currentMedia = mediaList.get(i);
+                                    if (currentMedia.getId().equals(data.getText())) {
+                                        changeHotspots();
+                                        if (currentMedia.getType() == 0) {
                                             imageStart();
                                             mVRLibrary.notifyPlayerChanged();
                                         }
@@ -203,11 +186,11 @@ public class FullScreenActivity extends AppCompatActivity {
                 }
             }
         });
-        mVRLibrary.switchDisplayMode(this,getIntent().getBooleanExtra(Constants.VR,false)?MDVRLibrary.DISPLAY_MODE_GLASS:MDVRLibrary.DISPLAY_MODE_NORMAL);
-        hotspot_point2.setVisibility(getIntent().getBooleanExtra(Constants.VR,false)?View.VISIBLE:View.GONE);
-        layoutProgress2.setVisibility(getIntent().getBooleanExtra(Constants.VR,false)?View.VISIBLE:View.GONE);
-        vr.setImageDrawable(getIntent().getBooleanExtra(Constants.VR,false)?getResources().getDrawable(R.drawable.google_cardboard): getResources().getDrawable(R.drawable.ic_panorama_black_24dp));
-        if (mMediaPlayerWrapper.getPlayer()!=null)
+        mVRLibrary.switchDisplayMode(this, getIntent().getBooleanExtra(Constants.VR, false) ? MDVRLibrary.DISPLAY_MODE_GLASS : MDVRLibrary.DISPLAY_MODE_NORMAL);
+        hotspot_point2.setVisibility(getIntent().getBooleanExtra(Constants.VR, false) ? View.VISIBLE : View.GONE);
+        layoutProgress2.setVisibility(getIntent().getBooleanExtra(Constants.VR, false) ? View.VISIBLE : View.GONE);
+        vr.setImageDrawable(getIntent().getBooleanExtra(Constants.VR, false) ? getResources().getDrawable(R.drawable.google_cardboard) : getResources().getDrawable(R.drawable.ic_panorama_black_24dp));
+        if (mMediaPlayerWrapper.getPlayer() != null)
             getPlayer().setOnPreparedListener(new IMediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(IMediaPlayer iMediaPlayer) {
@@ -216,10 +199,8 @@ public class FullScreenActivity extends AppCompatActivity {
                     playCycle();
                 }
             });
-        if (savedInstanceState!=null)
-        {
-            if (media.getType()>0)
-            {
+        if (savedInstanceState != null) {
+            if (currentMedia.getType() > 0) {
                 final Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
                     @Override
@@ -233,36 +214,33 @@ public class FullScreenActivity extends AppCompatActivity {
 
     }
 
-    void makeToast(View view , String text){
+    void makeToast(View view, String text) {
         int x = view.getLeft();
         int y = view.getTop();
         Toast toast = Toast.makeText(getBaseContext(), text, Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.TOP|Gravity.START, x, y);
+        toast.setGravity(Gravity.TOP | Gravity.START, x, y);
         toast.show();
     }
-    void buttonInit()
-    {
+
+    void buttonInit() {
         playButton = findViewById(R.id.playbut);
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mMediaPlayerWrapper.getPlayer().isPlaying())
-                {
+                if (mMediaPlayerWrapper.getPlayer().isPlaying()) {
                     playButton.setBackgroundDrawable(getResources().getDrawable(android.R.drawable.ic_media_play));
                     getPlayer().pause();
-                }
-                else
-                {
+                } else {
                     playButton.setBackgroundDrawable(getResources().getDrawable(android.R.drawable.ic_media_pause));
                     getPlayer().start();
                 }
             }
         });
-        controllersLayout  =findViewById(R.id.controllerslayout);
+        controllersLayout = findViewById(R.id.controllerslayout);
         controllersLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                controllersLayout .setVisibility(controllersLayout .getVisibility()==View.VISIBLE?View.INVISIBLE:View.VISIBLE);
+                controllersLayout.setVisibility(controllersLayout.getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
             }
         });
         final ImageButton full = findViewById(R.id.fullscreen);
@@ -275,7 +253,7 @@ public class FullScreenActivity extends AppCompatActivity {
         full.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                makeToast(full,"Exit Full screen");
+                makeToast(full, "Exit Full screen");
                 return true;
             }
         });
@@ -283,8 +261,8 @@ public class FullScreenActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 vr.setImageDrawable(mVRLibrary.getDisplayMode() == MDVRLibrary.DISPLAY_MODE_NORMAL ? getResources().getDrawable(R.drawable.ic_panorama_black_24dp) : getResources().getDrawable(R.drawable.google_cardboard));
-                hotspot_point2.setVisibility(mVRLibrary.getDisplayMode() == MDVRLibrary.DISPLAY_MODE_NORMAL?View.VISIBLE:View.GONE);
-                layoutProgress2.setVisibility(mVRLibrary.getDisplayMode() == MDVRLibrary.DISPLAY_MODE_NORMAL?View.VISIBLE:View.GONE);
+                hotspot_point2.setVisibility(mVRLibrary.getDisplayMode() == MDVRLibrary.DISPLAY_MODE_NORMAL ? View.VISIBLE : View.GONE);
+                layoutProgress2.setVisibility(mVRLibrary.getDisplayMode() == MDVRLibrary.DISPLAY_MODE_NORMAL ? View.VISIBLE : View.GONE);
                 mVRLibrary.switchDisplayMode(getBaseContext());
             }
         });
@@ -300,24 +278,21 @@ public class FullScreenActivity extends AppCompatActivity {
         motionMode.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                if (mVRLibrary.getInteractiveMode()==MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH)
-                    makeToast(motionMode,"Choose Touch Mode");
+                if (mVRLibrary.getInteractiveMode() == MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH)
+                    makeToast(motionMode, "Choose Touch Mode");
                 else
-                    makeToast(motionMode,"Choose Motion & Touch");
+                    makeToast(motionMode, "Choose Motion & Touch");
                 return true;
             }
         });
         motionMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mVRLibrary.getInteractiveMode()==MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH)
-                {
-                    mVRLibrary.switchInteractiveMode(getBaseContext(),MDVRLibrary.INTERACTIVE_MODE_TOUCH);
+                if (mVRLibrary.getInteractiveMode() == MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH) {
+                    mVRLibrary.switchInteractiveMode(getBaseContext(), MDVRLibrary.INTERACTIVE_MODE_TOUCH);
                     motionMode.setImageDrawable(getResources().getDrawable(R.drawable.ic_3d_rotation_black_24dp));
-                }
-                else
-                {
-                    mVRLibrary.switchInteractiveMode(getBaseContext(),MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH);
+                } else {
+                    mVRLibrary.switchInteractiveMode(getBaseContext(), MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH);
                     motionMode.setImageDrawable(getResources().getDrawable(R.drawable.ic_touch_app_black_24dp));
                 }
             }
@@ -325,31 +300,31 @@ public class FullScreenActivity extends AppCompatActivity {
         controllers.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                controllersLayout.setVisibility(controllersLayout.getVisibility()==View.VISIBLE?View.INVISIBLE:View.VISIBLE);
+                controllersLayout.setVisibility(controllersLayout.getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
             }
         });
         controllers.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                makeToast(controllers,"Use Controllers");
+                makeToast(controllers, "Use Controllers");
                 return true;
             }
         });
     }
-    void imageStart()
-    {
-        loadingBool =true;
+
+    void imageStart() {
+        loadingBool = true;
         controllers.setVisibility(View.GONE);
         controllersLayout.setVisibility(View.INVISIBLE);
-        if (mVRLibrary==null) {
+        if (mVRLibrary == null) {
             mVRLibrary = MDVRLibrary.with(this)
                     .displayMode(MDVRLibrary.DISPLAY_MODE_NORMAL)
                     .interactiveMode(MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH)
                     .asBitmap(new MDVRLibrary.IBitmapProvider() {
                         @Override
                         public void onProvideBitmap(final MD360BitmapTexture.Callback callback) {
-                            if (media != null)
-                                loadImage(media.getLink(), callback);
+                            if (currentMedia != null)
+                                loadImage(currentMedia.getLink(), callback);
                         }
                     })
                     .listenTouchPick(new MDVRLibrary.ITouchPickListener() {
@@ -370,7 +345,8 @@ public class FullScreenActivity extends AppCompatActivity {
             surfaceView.setTag(mTarget);
         }
     }
-    private void loadImage(String url, final MD360BitmapTexture.Callback callback){
+
+    private void loadImage(String url, final MD360BitmapTexture.Callback callback) {
         Log.d("Full", "load image with max texture size:" + callback.getMaxTextureSize());
         showBusy();
         mTarget = new Target() {
@@ -382,7 +358,7 @@ public class FullScreenActivity extends AppCompatActivity {
                 // texture
                 callback.texture(bitmap);
                 cancelBusy();
-                loadingBool=false;
+                loadingBool = false;
             }
 
             @Override
@@ -395,34 +371,34 @@ public class FullScreenActivity extends AppCompatActivity {
         };
         Picasso.with(getApplicationContext())
                 .load(url)
-                .resize(callback.getMaxTextureSize(),callback.getMaxTextureSize())
+                .resize(callback.getMaxTextureSize(), callback.getMaxTextureSize())
                 .onlyScaleDown()
                 .centerInside()
                 .memoryPolicy(NO_CACHE, NO_STORE)
                 .into(mTarget);
     }
-    public void showBusy(){
-        percent=0;
+
+    public void showBusy() {
+        percent = 0;
         progressBar.setVisibility(View.VISIBLE);
         loading();
     }
-    void loading()
-    {
-        percent=(percent+10)%100;
+
+    void loading() {
+        percent = (percent + 10) % 100;
         progressBar.setProgress(percent);
-        if (loadingBool)
-        {
+        if (loadingBool) {
             loadRunnable = new Runnable() {
                 @Override
                 public void run() {
                     loading();
                 }
             };
-            loadhandler.postDelayed(loadRunnable,500);
+            loadhandler.postDelayed(loadRunnable, 500);
         }
     }
-    void videoStart()
-    {
+
+    void videoStart() {
         mVRLibrary = MDVRLibrary.with(this)
                 .displayMode(MDVRLibrary.DISPLAY_MODE_NORMAL)
                 .interactiveMode(MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH)
@@ -448,7 +424,7 @@ public class FullScreenActivity extends AppCompatActivity {
             @Override
             public void onPrepared(IMediaPlayer mp) {
                 cancelBusy();
-                if (mVRLibrary != null){
+                if (mVRLibrary != null) {
                     mVRLibrary.notifyPlayerChanged();
                 }
             }
@@ -462,7 +438,7 @@ public class FullScreenActivity extends AppCompatActivity {
         getPlayer().setOnErrorListener(new IMediaPlayer.OnErrorListener() {
             @Override
             public boolean onError(IMediaPlayer mp, int what, int extra) {
-                String error = String.format(Locale.US,"Play Error what=%d extra=%d",what,extra);
+                String error = String.format(Locale.US, "Play Error what=%d extra=%d", what, extra);
                 Toast.makeText(getBaseContext(), error, Toast.LENGTH_SHORT).show();
                 return true;
             }
@@ -470,7 +446,7 @@ public class FullScreenActivity extends AppCompatActivity {
         getPlayer().setOnBufferingUpdateListener(new IMediaPlayer.OnBufferingUpdateListener() {
             @Override
             public void onBufferingUpdate(IMediaPlayer iMediaPlayer, int i) {
-                float f = (i/100.0f)*seekBar.getMax();
+                float f = (i / 100.0f) * seekBar.getMax();
                 seekBar.setSecondaryProgress((int) f);
             }
         });
@@ -481,16 +457,18 @@ public class FullScreenActivity extends AppCompatActivity {
                 if (fromUser)
                     getPlayer().seekTo(progress);
             }
+
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
             }
+
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
     }
-    void setVideoUri(String uri, final long seek)
-    {
+
+    void setVideoUri(String uri, final long seek) {
 
         mMediaPlayerWrapper.openRemoteFile(uri);
         mMediaPlayerWrapper.prepare();
@@ -506,10 +484,11 @@ public class FullScreenActivity extends AppCompatActivity {
 
         cancelBusy();
     }
+
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (media.getType()>0) {
+            if (currentMedia.getType() > 0) {
                 int t = intent.getIntExtra(Constants.TYPE, 0);
                 if (t == (Constants.TYPE_RESULT) && intent.getIntExtra(Constants.RESULT, 0) == Activity.RESULT_OK) {
                     setVideoUri(intent.getStringExtra(Constants.FILE), 0);
@@ -519,86 +498,52 @@ public class FullScreenActivity extends AppCompatActivity {
             }
         }
     };
-    void updateProgress(int prog)
-    {
+
+    void updateProgress(int prog) {
         progressBar.setProgress(prog);
     }
-    public void cancelBusy(){
+
+    public void cancelBusy() {
         progressBar.setVisibility(View.GONE);
     }
-    IMediaPlayer getPlayer()
-    {
+
+    IMediaPlayer getPlayer() {
         return mMediaPlayerWrapper.getPlayer();
     }
 
-    Runnable runnable ;
+    Runnable runnable;
     Handler handler = new Handler();
-    void playCycle()
-    {
+
+    void playCycle() {
         seekBar.setProgress((int) getPlayer().getCurrentPosition());
-        if (getPlayer().isPlaying())
-        {
+        if (getPlayer().isPlaying()) {
             runnable = new Runnable() {
                 @Override
                 public void run() {
                     playCycle();
                 }
             };
-            handler.postDelayed(runnable,1000);
+            handler.postDelayed(runnable, 1000);
         }
 
     }
-    void downloadHotspots(String id)
-    {
-        findViewById(R.id.progresses).setVisibility(View.GONE);
-        removePlugins();
-        Uri uri = Uri.parse(Constants.BASE+"/hotspots_of_media.php").buildUpon().appendQueryParameter("id",id).build();
-        StringRequestNew stringRequest = new StringRequestNew(Request.Method.GET, uri.toString(),
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Log.v("data",response);
-                        try {
-                            JSONObject o = new JSONObject(response);
-                            int suc = o.getInt("success");
-                            if (suc==1) {
-                                JSONArray arr = o.getJSONArray("hotspots");
-                                Hotspot hotspot;
-                                hotspots.clear();
-                                for (int i = 0; i < arr.length(); i++) {
-                                    JSONObject obj = (JSONObject) arr.get(i);
-                                    hotspot = new Hotspot(obj.getString("id")
-                                            ,obj.getString("text")
-                                            ,obj.getDouble("yaw")
-                                            ,obj.getDouble("pitch")
-                                            ,obj.getInt("type"));
-                                    addHotspot(hotspot,hotspots.size());
-                                    hotspots.add(hotspot);
-                                }
-                                Toast.makeText(getBaseContext(), "Hotspots download complete!", Toast.LENGTH_SHORT).show();
-                            }
-                            else Toast.makeText(getBaseContext(), o.getString("message"), Toast.LENGTH_SHORT).show();
-                        } catch (JSONException e) {
-                            Toast.makeText(getBaseContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getBaseContext(),error.getMessage(),Toast.LENGTH_SHORT).show();
+    void changeHotspots() {
+        hotspots.clear();
+        if (currentMedia != null)
+            for (Hotspot hotspot : currentMedia.getHotspots()) {
+                addHotspotToView(hotspot);
+                hotspots.add(hotspot);
             }
-        });
-        MyApp.getInstance().addToRequestQueue(stringRequest);
+
     }
-    void addHotspot(final Hotspot hotspot,int index)
-    {
-        double y = 25*Math.sin(Math.toRadians(hotspot.getPitch()));
-        double z = -25*Math.cos(Math.toRadians(hotspot.getPitch()));
-        MDPosition position =MDPosition.newInstance().setY((float)y).setZ((float)z).setYaw((float)hotspot.getPitch())
-                .setAngleY((float)(-1*(hotspot.getYaw()+90)+180));
+
+    void addHotspotToView(final Hotspot hotspot) {
+        double y = 25 * Math.sin(Math.toRadians(hotspot.getPitch()));
+        double z = -25 * Math.cos(Math.toRadians(hotspot.getPitch()));
+        MDPosition position = MDPosition.newInstance().setY((float) y).setZ((float) z).setYaw((float) hotspot.getPitch())
+                .setAngleY((float) (-1 * (hotspot.getYaw() + 90) + 180));
         MDHotspotBuilder builder;
-        if (hotspot.getType()==0) {
+        if (hotspot.getType() == 0) {
             builder = MDHotspotBuilder.create(mImageLoadProvider)
                     .size(4f, 4f)
                     .provider(0, this, R.drawable.sound_icon_inactive)
@@ -610,21 +555,18 @@ public class FullScreenActivity extends AppCompatActivity {
                         public void onHotspotHit(IMDHotspot hitHotspot, MDRay ray) {
                             if (hitHotspot instanceof MDWidgetPlugin) {
                                 MDWidgetPlugin widgetPlugin = (MDWidgetPlugin) hitHotspot;
-                                String s = hotspot.getText() ;
+                                String s = hotspot.getText();
                                 if (canspeak && !s.isEmpty()) {
-                                    textToSpeech.speak(s, TextToSpeech.QUEUE_FLUSH, null,null);
+                                    textToSpeech.speak(s, TextToSpeech.QUEUE_FLUSH, null, null);
                                 }
                                 widgetPlugin.setChecked(!widgetPlugin.getChecked());
                             }
                         }
                     })
-                    .title(String.format("%d",index))
                     .position(position)
                     .status(0, 1)
                     .checkedStatus(10, 11);
-        }
-        else
-        {
+        } else {
             builder = MDHotspotBuilder.create(mImageLoadProvider)
                     .size(4f, 4f)
                     .provider(0, this, R.drawable.panorama2incative)
@@ -636,15 +578,12 @@ public class FullScreenActivity extends AppCompatActivity {
                         public void onHotspotHit(IMDHotspot hitHotspot, MDRay ray) {
                             if (hitHotspot instanceof MDWidgetPlugin) {
                                 MDWidgetPlugin widgetPlugin = (MDWidgetPlugin) hitHotspot;
-                                if (!mediaList.isEmpty())
-                                {
-                                    for (int i = 0 ; i < mediaList.size();i++)
-                                    {
-                                        media = mediaList.get(i);
-                                        if (media.getId().equals(hotspot.getText()))
-                                        {
-                                            downloadHotspots(media.getId());
-                                            if (media.getType() == 0) {
+                                if (!mediaList.isEmpty()) {
+                                    for (int i = 0; i < mediaList.size(); i++) {
+                                        currentMedia = mediaList.get(i);
+                                        if (currentMedia.getId().equals(hotspot.getText())) {
+                                            changeHotspots();
+                                            if (currentMedia.getType() == 0) {
                                                 imageStart();
                                                 mVRLibrary.notifyPlayerChanged();
                                             }
@@ -656,7 +595,6 @@ public class FullScreenActivity extends AppCompatActivity {
                             }
                         }
                     })
-                    .title(String.format("%d",index))
                     .position(position)
                     .status(0, 1)
                     .checkedStatus(10, 11);
@@ -667,14 +605,15 @@ public class FullScreenActivity extends AppCompatActivity {
         mVRLibrary.addPlugin(plugin);
         //Toast.makeText(this, "add plugin position:" + position, Toast.LENGTH_SHORT).show();
     }
-    void removePlugins()
-    {
+
+    void removePlugins() {
         plugins.clear();
         mVRLibrary.removePlugins();
     }
-    private class ImageLoadProvider implements MDVRLibrary.IImageLoadProvider{
 
-        private SimpleArrayMap<Uri,Target> targetMap = new SimpleArrayMap<>();
+    private class ImageLoadProvider implements MDVRLibrary.IImageLoadProvider {
+
+        private SimpleArrayMap<Uri, Target> targetMap = new SimpleArrayMap<>();
 
         @Override
         public void onProvideBitmap(final Uri uri, final MD360BitmapTexture.Callback callback) {
@@ -702,11 +641,12 @@ public class FullScreenActivity extends AppCompatActivity {
 
             Picasso.with(getApplicationContext())
                     .load(uri)
-                    .resize(callback.getMaxTextureSize(),callback.getMaxTextureSize())
+                    .resize(callback.getMaxTextureSize(), callback.getMaxTextureSize())
                     .onlyScaleDown().centerInside()
                     .memoryPolicy(NO_CACHE, NO_STORE).into(target);
         }
     }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -720,7 +660,7 @@ public class FullScreenActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         mVRLibrary.onPause(this);
-        if (mMediaPlayerWrapper!=null)
+        if (mMediaPlayerWrapper != null)
             mMediaPlayerWrapper.pause();
         playButton.setBackgroundDrawable(getResources().getDrawable(android.R.drawable.ic_media_play));
         unregisterReceiver(broadcastReceiver);
@@ -730,23 +670,26 @@ public class FullScreenActivity extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
         mVRLibrary.onDestroy();
-        if (mMediaPlayerWrapper!=null)
+        if (mMediaPlayerWrapper != null)
             mMediaPlayerWrapper.destroy();
         handler.removeCallbacks(runnable);
         loadhandler.removeCallbacks(loadRunnable);
-        if(textToSpeech!=null){
+        if (textToSpeech != null) {
             textToSpeech.stop();
-            textToSpeech.shutdown();}
+            textToSpeech.shutdown();
+        }
     }
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mVRLibrary.onOrientationChanged(this);
         getPlayer().start();
     }
+
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putLong(Constants.SEEK,getPlayer().getCurrentPosition());
+        outState.putLong(Constants.SEEK, getPlayer().getCurrentPosition());
     }
 }

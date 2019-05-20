@@ -3,7 +3,9 @@ package com.magdy.travelli.Data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Hotspot implements Parcelable {
+import java.io.Serializable;
+
+public class Hotspot implements Serializable {
     private String id, text, key;
     private double yaw, pitch;
     private int type;
@@ -64,37 +66,4 @@ public class Hotspot implements Parcelable {
         this.key = key;
     }
 
-    private Hotspot(Parcel in) {
-        id = in.readString();
-        text = in.readString();
-        yaw = in.readDouble();
-        pitch = in.readDouble();
-        type = in.readInt();
-        key = in.readString();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(id);
-        dest.writeString(text);
-        dest.writeDouble(yaw);
-        dest.writeDouble(pitch);
-        dest.writeInt(type);
-        dest.writeString(key);
-    }
-
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-        public Hotspot createFromParcel(Parcel in) {
-            return new Hotspot(in);
-        }
-
-        public Hotspot[] newArray(int size) {
-            return new Hotspot[size];
-        }
-    };
 }

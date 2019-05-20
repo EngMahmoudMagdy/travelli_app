@@ -1,11 +1,13 @@
 package com.magdy.travelli.Data;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import java.io.Serializable;
+import java.util.List;
 
-public class Media implements Parcelable {
+public class Media implements Serializable {
     private int type;
     private String id, name, link, key;
+    private List<Hotspot> hotspots;
+
 
     public void setName(String name) {
         this.name = name;
@@ -39,42 +41,13 @@ public class Media implements Parcelable {
         return name;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public List<Hotspot> getHotspots() {
+        return hotspots;
     }
 
-    private Media(Parcel in) {
-        this.id = in.readString();
-        this.link = in.readString();
-        this.name = in.readString();
-        this.type = in.readInt();
-        this.key = in.readString();
+    public void setHotspots(List<Hotspot> hotspots) {
+        this.hotspots = hotspots;
     }
-
-    public Media() {
-
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.id);
-        dest.writeString(this.link);
-        dest.writeString(this.name);
-        dest.writeInt(this.type);
-        dest.writeString(this.key);
-    }
-
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-        public Media createFromParcel(Parcel in) {
-            return new Media(in);
-        }
-
-        public Media[] newArray(int size) {
-            return new Media[size];
-        }
-    };
-
     public String getKey() {
         return key;
     }

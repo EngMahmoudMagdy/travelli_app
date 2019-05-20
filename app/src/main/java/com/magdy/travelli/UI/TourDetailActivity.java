@@ -60,16 +60,12 @@ import com.magdy.travelli.Adapters.MediaPlayerWrapper;
 import com.magdy.travelli.Data.Constants;
 import com.magdy.travelli.Data.Hotspot;
 import com.magdy.travelli.Data.Media;
+import com.magdy.travelli.Data.MediaListPackage;
 import com.magdy.travelli.Data.Tour;
 import com.magdy.travelli.R;
 import com.magdy.travelli.Services.VideoDownloadService;
-import com.magdy.travelli.helpers.StaticMembers;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,6 +80,10 @@ import static com.magdy.travelli.Data.Constants.ISREADY;
 import static com.magdy.travelli.Data.Constants.SEEK;
 import static com.magdy.travelli.Data.Constants.URL;
 import static com.magdy.travelli.Data.Constants.VR;
+import static com.magdy.travelli.helpers.StaticMembers.MEDIA;
+import static com.magdy.travelli.helpers.StaticMembers.MEDIA_LIST;
+import static com.magdy.travelli.helpers.StaticMembers.PLACES;
+import static com.magdy.travelli.helpers.StaticMembers.TOURS;
 import static com.squareup.picasso.MemoryPolicy.NO_CACHE;
 import static com.squareup.picasso.MemoryPolicy.NO_STORE;
 
@@ -149,52 +149,53 @@ public class TourDetailActivity extends AppCompatActivity {
         buttonsInit();
         imageStart();
         videoStart();
+
         hotspots = new ArrayList<>();
-        if (savedInstanceState == null) {
-            mediaList = new ArrayList<>();
-            //downloadMedia(tour.getId());
-            FirebaseDatabase.getInstance().getReference(StaticMembers.MEDIA).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    mediaList.clear();
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        Media media = snapshot.getValue(Media.class);
-                        if (media != null)
-                            mediaList.add(media);
-                    }
-                    turn = 0;
-                    if (!mediaList.isEmpty()) {
-                        currentMedia = mediaList.get(0);
-                        indicator.setText(String.format(Locale.getDefault(), "%d ==> %d", turn + 1, mediaList.size()));
-                        //getmVRLibrary().onResume(getBaseContext());
-                        if (currentMedia.getType() == 0) {
-                            imageStart();
-                            downloadHotspots(currentMedia.getId(), currentMedia.getKey());
-                            mVRLibrary.notifyPlayerChanged();
-                        } else {
-                            videoStart();
-                            Intent mServiceIntent = new Intent(getBaseContext(), VideoDownloadService.class);
-                            mServiceIntent.putExtra(URL, currentMedia.getLink());
-                            mServiceIntent.putExtra(ID, currentMedia.getId());
-                            startService(mServiceIntent);
-                            isReady = true;
+        mediaList = new ArrayList<>();
+        FirebaseDatabase.getInstance().getReference().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot root) {
+                DataSnapshot tourSnapshot = root.child(TOURS).child(tour.getKey());
+                mediaList.clear();
+                for (DataSnapshot placeSnapShot : tourSnapshot.child(PLACES).getChildren()) {
+                    for (DataSnapshot mediaSnapShot : placeSnapShot.child(MEDIA).getChildren()) {
+                        String mediaKey = mediaSnapShot.getValue(String.class);
+                        if (mediaKey != null) {
+                            Media media = root.child(MEDIA).child(mediaKey).getValue(Media.class);
+                            if (media != null)
+                                mediaList.add(media);
                         }
-                    } else {
-                        right.setVisibility(View.INVISIBLE);
-                        left.setVisibility(View.INVISIBLE);
                     }
-                    Toast.makeText(getBaseContext(), "Media links download complete!", Toast.LENGTH_SHORT).show();
                 }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                turn = 0;
+                if (!mediaList.isEmpty()) {
+                    currentMedia = mediaList.get(turn);
+                    indicator.setText(String.format(Locale.getDefault(), "%d ==> %d", turn + 1, mediaList.size()));
+                    if (currentMedia.getType() == 0) {
+                        imageStart();
+                        changeHotspots();
+                        mVRLibrary.notifyPlayerChanged();
+                    } else {
+                        videoStart();
+                        Intent mServiceIntent = new Intent(getBaseContext(), VideoDownloadService.class);
+                        mServiceIntent.putExtra(URL, currentMedia.getLink());
+                        mServiceIntent.putExtra(ID, currentMedia.getId());
+                        startService(mServiceIntent);
+                        isReady = true;
+                    }
+                } else {
+                    right.setVisibility(View.INVISIBLE);
+                    left.setVisibility(View.INVISIBLE);
                 }
-            });
-        } else {
-            mediaList = savedInstanceState.getParcelableArrayList(Constants.CURRRENT_MED);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        if (savedInstanceState != null) {
             turn = savedInstanceState.getInt(Constants.TURN_MED);
-            currentMedia = mediaList.get(turn);
             indicator.setText(String.format(Locale.getDefault(), "%d ==> %d", turn + 1, mediaList.size()));
             updateRightLeft();
             if (currentMedia.getType() > 0) {
@@ -205,11 +206,6 @@ public class TourDetailActivity extends AppCompatActivity {
                 library.notifyPlayerChanged();
                 setVideoUri(outFilePath, savedInstanceState.getLong(SEEK));
             } else {
-                hotspots = savedInstanceState.getParcelableArrayList(Constants.CURRRENT_HS);
-                assert hotspots != null;
-                for (Hotspot hotspot : hotspots) {
-                    addHotspot(hotspot);
-                }
                 imageStart();
                 MDVRLibrary library = getmVRLibrary();
                 library.notifyPlayerChanged();
@@ -217,8 +213,6 @@ public class TourDetailActivity extends AppCompatActivity {
         }
         mViewPager = findViewById(R.id.viewpager);
         setupViewPager(mViewPager);
-
-        //mViewPager.setAdapter(mSectionsPagerAdapter);
 
         TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
@@ -383,7 +377,7 @@ public class TourDetailActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent i = new Intent(getBaseContext(), FullScreenActivity.class);
                 i.putExtra(Constants.CURRRENT_MED, currentMedia);
-                i.putExtra(Constants.ALLMED, mediaList);
+                i.putExtra(MEDIA_LIST, new MediaListPackage(mediaList));
                 if (currentMedia.getType() > 0) {
                     i.putExtra(SEEK, getPlayer().getCurrentPosition());
                     i.putExtra(URL, outFilePath);
@@ -407,7 +401,7 @@ public class TourDetailActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent i = new Intent(getBaseContext(), FullScreenActivity.class);
                 i.putExtra(Constants.CURRRENT_MED, currentMedia);
-                i.putExtra(Constants.ALLMED, mediaList);
+                i.putExtra(MEDIA_LIST, new MediaListPackage(mediaList));
                 if (currentMedia.getType() > 0) {
                     i.putExtra(SEEK, getPlayer().getCurrentPosition());
                     i.putExtra(URL, outFilePath);
@@ -476,7 +470,7 @@ public class TourDetailActivity extends AppCompatActivity {
                     indicator.setText(String.format(Locale.getDefault(), "%d ==> %d", turn + 1, mediaList.size()));
                     if (currentMedia.getType() == 0) {
                         imageStart();
-                        downloadHotspots(currentMedia.getId(), currentMedia.getKey());
+                        changeHotspots();
                     } else {
                         videoStart();
                         Intent mServiceIntent = new Intent(getBaseContext(), VideoDownloadService.class);
@@ -504,7 +498,7 @@ public class TourDetailActivity extends AppCompatActivity {
                     indicator.setText(String.format(Locale.getDefault(), "%d ==> %d", turn + 1, mediaList.size()));
                     if (currentMedia.getType() == 0) {
                         imageStart();
-                        downloadHotspots(currentMedia.getId(), currentMedia.getKey());
+                        changeHotspots();
                     } else {
                         videoStart();
                         Intent mServiceIntent = new Intent(getBaseContext(), VideoDownloadService.class);
@@ -559,7 +553,6 @@ public class TourDetailActivity extends AppCompatActivity {
     }
 
     void makeToast(View view, String text) {
-
         int x = view.getLeft();
         int y = view.getTop();
         Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
@@ -690,56 +683,17 @@ public class TourDetailActivity extends AppCompatActivity {
     }
 
 
-    void downloadHotspots(String id, String key) {
-        String response = "";
-        switch (Integer.parseInt(id)) {
-            case 1:
-                response = "{\"hotspots\":[{\"id\":\"1\",\"text\":\"2\",\"yaw\":25.920267219381,\"pitch\":5.0098862414458,\"type\":1},{\"id\":\"2\",\"text\":\"3\",\"yaw\":-15.920267219381,\"pitch\":5.0098862414458,\"type\":1}],\"success\":1}";
-                break;
-            case 2:
-                response = "{\"hotspots\":[{\"id\":\"3\",\"text\":\"1\",\"yaw\":-156.30399964212,\"pitch\":-0.13624313075199,\"type\":1},{\"id\":\"4\",\"text\":\"3\",\"yaw\":-156.30399964212,\"pitch\":-0.13624313075199,\"type\":1},{\"id\":\"5\",\"text\":\"this is the hanging church it is a historical place in Egypt\",\"yaw\":66.052202336034,\"pitch\":2.682307006456,\"type\":0}],\"success\":1}\n";
-                break;
-            case 3:
-                response = "{\"hotspots\":[{\"id\":\"6\",\"text\":\"1\",\"yaw\":-100.92026721938,\"pitch\":5.0098862414458,\"type\":1}],\"success\":1}\n";
-                break;
-        }
-
-        if (!response.isEmpty()) {
-            try {
-                JSONObject o = new JSONObject(response);
-                int suc = o.getInt("success");
-                if (suc == 1) {
-                    JSONArray arr = o.getJSONArray("hotspots");
-                    Hotspot hotspot;
-                    hotspots.clear();
-                    for (int i = 0; i < arr.length(); i++) {
-                        JSONObject obj = (JSONObject) arr.get(i);
-                        hotspot = new Hotspot(obj.getString("id")
-                                , obj.getString("text")
-                                , obj.getDouble("yaw")
-                                , obj.getDouble("pitch")
-                                , obj.getInt("type"));
-                        addHotspot(hotspot);
-                        hotspots.add(hotspot);
-                    }
-//                    for (Hotspot h : hotspots) {
-//                        DatabaseReference dr = FirebaseDatabase.getInstance().getReference(StaticMembers.MEDIA)
-//                                .child(key).child(StaticMembers.HOTSPOTS).push();
-//                        dr.setValue(h);
-//                        h.setKey(dr.getKey());
-//                    }
-                    Toast.makeText(getBaseContext(), "Hotspots download complete!", Toast.LENGTH_SHORT).show();
-                } else
-                    Toast.makeText(getBaseContext(), o.getString("message"), Toast.LENGTH_SHORT).show();
-            } catch (JSONException e) {
-                Toast.makeText(getBaseContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
-                e.printStackTrace();
+    void changeHotspots() {
+        hotspots.clear();
+        if (currentMedia != null)
+            for (Hotspot hotspot : currentMedia.getHotspots()) {
+                addHotspotToView(hotspot);
+                hotspots.add(hotspot);
             }
-        }
 
     }
 
-    void addHotspot(final Hotspot hotspot) {
+    void addHotspotToView(final Hotspot hotspot) {
         double y = 25 * Math.sin(Math.toRadians(hotspot.getPitch()));
         double z = -25 * Math.cos(Math.toRadians(hotspot.getPitch()));
         MDPosition position = MDPosition.newInstance().setY((float) y).setZ((float) z).setYaw((float) hotspot.getPitch())
@@ -786,7 +740,7 @@ public class TourDetailActivity extends AppCompatActivity {
                                         currentMedia = mediaList.get(i);
                                         if (currentMedia.getId().equals(hotspot.getText())) {
                                             turn = i;
-                                            downloadHotspots(currentMedia.getId(), currentMedia.getKey());
+                                            changeHotspots();
                                             indicator.setText(String.format(Locale.getDefault(), "%d ==> %d", turn + 1, mediaList.size()));
                                             if (currentMedia.getType() == 0) {
                                                 imageStart();
@@ -938,11 +892,9 @@ public class TourDetailActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (currentMedia != null) {
-
-            outState.putParcelableArrayList(Constants.CURRRENT_MED, mediaList);
             outState.putInt(Constants.TURN_MED, turn);
             if (currentMedia.getType() == 0) {
-                outState.putParcelableArrayList(Constants.CURRRENT_HS, hotspots);
+
             } else {
                 outState.putLong(SEEK, getPlayer().getCurrentPosition());
                 outState.putString(FILE, outFilePath);
@@ -999,11 +951,11 @@ public class TourDetailActivity extends AppCompatActivity {
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         Fragment fragment = DetailsFragment.newInstance(tour);
-        adapter.addFrag(fragment, "Details");
+        adapter.addFrag(fragment, getString(R.string.details));
         fragment = PlacesFragment.newInstance(tour);
-        adapter.addFrag(fragment, "Places");
+        adapter.addFrag(fragment, getString(R.string.places));
         fragment = ReviewsFragment.newInstance(tour);
-        adapter.addFrag(fragment, "Reviews");
+        adapter.addFrag(fragment, getString(R.string.reviews));
         viewPager.setAdapter(adapter);
     }
 }

@@ -1,16 +1,26 @@
 package com.magdy.travelli.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class Place implements Serializable {
-    String key;
-
+    private String key;
+    private List<String> media;
     public String getKey() {
         return key;
     }
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+
+    public List<String> getMedia() {
+        return media;
+    }
+
+    public void setMedia(List<String> media) {
+        this.media = media;
     }
 
     @com.google.gson.annotations.SerializedName("id")

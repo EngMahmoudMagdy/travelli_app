@@ -28,6 +28,7 @@ import com.magdy.travelli.Data.Place;
 import com.magdy.travelli.Data.Tour;
 import com.magdy.travelli.R;
 import com.magdy.travelli.Services.StringRequestNew;
+import com.magdy.travelli.helpers.StaticMembers;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,7 +59,7 @@ public class PlacesFragment extends Fragment {
         View view = inflater.inflate(R.layout.place_tab_in_tour_details, container, false);
         queue = Volley.newRequestQueue(Objects.requireNonNull(getContext()));
         return view;
-    }
+    };
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -92,7 +93,6 @@ public class PlacesFragment extends Fragment {
                     place.setLat(obj.getDouble("lat"));
                     places.add(place);
                 }
-                addPlace(0);
             } else Toast.makeText(getContext(), o.getString("message"), Toast.LENGTH_SHORT).show();
             adapter.notifyDataSetChanged();
         } catch (JSONException e) {
@@ -103,20 +103,5 @@ public class PlacesFragment extends Fragment {
 
     }
 
-    void addPlace(final int i) {
-        if (!places.isEmpty() && i < places.size()) {
-            final Place place = places.get(i);
-            final DatabaseReference dr = FirebaseDatabase.getInstance().getReference(TOURS).push();
-            dr.setValue(place).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if (task.isSuccessful()) {
-                        place.setKey(dr.getKey());
-                        addPlace(i + 1);
-                    }
-                }
-            });
-        }
-    }
 
 }
