@@ -34,6 +34,8 @@ public class StaticMembers {
     public static final String FAV = "fav";
     public static final String ISO_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
     public static final String DATE_FORMAT_VIEW = "yyyy-M-dd hh:mm";
+    public static final String PLACES = "places";
+    public static final String MEDIA_LIST = "media_list";
     private static final String LANGUAGE = "language";
     public static final String EMAIL = "email";
     public static final String PASSWORD = "password";
@@ -52,13 +54,16 @@ public class StaticMembers {
             dots[i] = new TextView(context);
             dots[i].setText(Html.fromHtml("&#8226;"));
             dots[i].setTextSize(35);
+            dots[i].setGravity(View.TEXT_ALIGNMENT_CENTER);
             dots[i].setTextColor(context.getResources().getColor(R.color.colorAccent));
             dotsLayout.addView(dots[i]);
         }
 
         if (dots.length > currentPage)
+        {
             dots[currentPage].setTextColor(context.getResources().getColor(R.color.colorPrimary));
-        dots[currentPage].setTextSize(50);
+            dots[currentPage].setTextSize(50);
+        }
     }
     /////////////////////////////combine bitmaps///////////////////
     /*
