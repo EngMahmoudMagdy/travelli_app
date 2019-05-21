@@ -3,7 +3,9 @@
     <color name="colorPrimary">#2196F3</color>
     <color name="colorPrimaryDark">#1565C0</color>
     <color name="colorAccent">#AFAFAF</color>
+    <color name="colorAccentTrans">#89AFAFAF</color>
     <color name="colorPrimaryTrans">#432196F3</color>
+    <color name="colorPrimaryTrans2">#A12196F3</color>
     <color name="textColorPrimary">#FFFFFF</color>
     <color name="grey">#D0D0D0</color>
     <color name="light_grey">#d7d7d7</color>
@@ -27,4 +29,5 @@
     <color name="circleProgressCompleteStartGradient">@color/colorPrimary</color>
     <color name="circleProgressCompleteEndGradient">@color/colorPrimaryDark</color>
     <color name="whiteTrans">#aaFFFFFF</color>
+    <color name="black">#000</color>
 </resources>

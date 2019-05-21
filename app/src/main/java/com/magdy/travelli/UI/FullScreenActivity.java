@@ -10,18 +10,20 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
+import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.util.SimpleArrayMap;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -38,13 +40,6 @@ import com.asha.vrlib.model.BarrelDistortionConfig;
 import com.asha.vrlib.model.MDHitEvent;
 import com.asha.vrlib.model.MDHotspotBuilder;
 import com.asha.vrlib.model.MDPinchConfig;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
-import tv.danmaku.ijk.media.player.IMediaPlayer;
-
 import com.asha.vrlib.model.MDPosition;
 import com.asha.vrlib.model.MDRay;
 import com.asha.vrlib.plugins.MDAbsPlugin;
@@ -61,6 +56,12 @@ import com.magdy.travelli.R;
 import com.magdy.travelli.helpers.StaticMembers;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+import tv.danmaku.ijk.media.player.IMediaPlayer;
 
 import static com.squareup.picasso.MemoryPolicy.NO_CACHE;
 import static com.squareup.picasso.MemoryPolicy.NO_STORE;
@@ -85,7 +86,7 @@ public class FullScreenActivity extends AppCompatActivity {
     TextView hotspot_point1, hotspot_point2;
     RelativeLayout layoutProgress2;
     ProgressBar circleProgress1, circleProgress2;
-    ImageButton vr;
+    CheckBox vr;
     private boolean loadingBool;
     private Target mTarget;
     private int percent;
@@ -194,7 +195,7 @@ public class FullScreenActivity extends AppCompatActivity {
         mVRLibrary.switchDisplayMode(this, getIntent().getBooleanExtra(Constants.VR, false) ? MDVRLibrary.DISPLAY_MODE_GLASS : MDVRLibrary.DISPLAY_MODE_NORMAL);
         hotspot_point2.setVisibility(getIntent().getBooleanExtra(Constants.VR, false) ? View.VISIBLE : View.GONE);
         layoutProgress2.setVisibility(getIntent().getBooleanExtra(Constants.VR, false) ? View.VISIBLE : View.GONE);
-        vr.setImageDrawable(getIntent().getBooleanExtra(Constants.VR, false) ? getResources().getDrawable(R.drawable.google_cardboard) : getResources().getDrawable(R.drawable.ic_panorama_black_24dp));
+        vr.setChecked(getIntent().getBooleanExtra(Constants.VR, false));
         if (mMediaPlayerWrapper.getPlayer() != null)
             getPlayer().setOnPreparedListener(new IMediaPlayer.OnPreparedListener() {
                 @Override
@@ -262,13 +263,14 @@ public class FullScreenActivity extends AppCompatActivity {
                 return true;
             }
         });
-        vr.setOnClickListener(new View.OnClickListener() {
+        vr.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
-                vr.setImageDrawable(mVRLibrary.getDisplayMode() == MDVRLibrary.DISPLAY_MODE_NORMAL ? getResources().getDrawable(R.drawable.ic_panorama_black_24dp) : getResources().getDrawable(R.drawable.google_cardboard));
-                hotspot_point2.setVisibility(mVRLibrary.getDisplayMode() == MDVRLibrary.DISPLAY_MODE_NORMAL ? View.VISIBLE : View.GONE);
-                layoutProgress2.setVisibility(mVRLibrary.getDisplayMode() == MDVRLibrary.DISPLAY_MODE_NORMAL ? View.VISIBLE : View.GONE);
-                mVRLibrary.switchDisplayMode(getBaseContext());
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (buttonView.isPressed()) {
+                    hotspot_point2.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+                    layoutProgress2.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+                    mVRLibrary.switchDisplayMode(getBaseContext());
+                }
             }
         });
         vr.setOnLongClickListener(new View.OnLongClickListener() {
@@ -295,10 +297,10 @@ public class FullScreenActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (mVRLibrary.getInteractiveMode() == MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH) {
                     mVRLibrary.switchInteractiveMode(getBaseContext(), MDVRLibrary.INTERACTIVE_MODE_TOUCH);
-                    motionMode.setImageDrawable(getResources().getDrawable(R.drawable.ic_3d_rotation_black_24dp));
+                    motionMode.setImageDrawable(getResources().getDrawable(R.drawable.touch_and_motion_white));
                 } else {
                     mVRLibrary.switchInteractiveMode(getBaseContext(), MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH);
-                    motionMode.setImageDrawable(getResources().getDrawable(R.drawable.ic_touch_app_black_24dp));
+                    motionMode.setImageDrawable(getResources().getDrawable(R.drawable.touch_white));
                 }
             }
         });

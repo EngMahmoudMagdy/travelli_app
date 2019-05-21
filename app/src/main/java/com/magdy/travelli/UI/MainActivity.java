@@ -1,6 +1,5 @@
 package com.magdy.travelli.UI;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.support.design.widget.NavigationView;
@@ -14,27 +13,14 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.magdy.travelli.Adapters.SearchAdapter;
-import com.magdy.travelli.Adapters.SharedPreference;
-import com.magdy.travelli.Adapters.Utils;
 import com.magdy.travelli.R;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -203,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     public void loadToolBarSearch() {
-
+/*
         ArrayList<String> countryStored = SharedPreference.loadList(MainActivity.this, Utils.PREFS_NAME, Utils.KEY_COUNTRIES);
         View view = MainActivity.this.getLayoutInflater().inflate(R.layout.view_toolbar_search, null);
         LinearLayout parentToolbarSearch = view.findViewById(R.id.parent_toolbar_search);
@@ -278,6 +264,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 toolbarSearchDialog.dismiss();
             }
-        });
+        });*/
     }
 }

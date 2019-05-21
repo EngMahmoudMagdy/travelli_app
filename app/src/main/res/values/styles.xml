@@ -58,9 +58,23 @@
         <item name="colorControlNormal">@color/duskYellow</item>
     </style>
 
-    <style name="smallRatingBar" parent="android:style/Widget.Material.RatingBar.Small">
+    <style name="smallRatingBar" parent="@style/Widget.AppCompat.RatingBar.Small">
         <item name="android:numStars">5</item>
         <item name="android:stepSize">.1</item>
+        <item name="colorControlNormal">@color/colorAccent</item>
+        <item name="colorControlActivated">@color/colorPrimary</item>
+    </style>
+
+    <style name="Widget.Button.Toggle" parent="android:Widget">
+        <item name="android:background">@drawable/motion_drawable</item>
+        <item name="android:disabledAlpha">?android:attr/disabledAlpha</item>
+    </style>
+
+    <style name="toggleButton" parent="LayoutClickable">
+        <item name="android:width">50dp</item>
+        <item name="android:height">50dp</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:button">@null</item>
     </style>
 
     <style name="Clickable">

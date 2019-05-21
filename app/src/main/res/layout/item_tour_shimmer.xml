@@ -70,6 +70,7 @@
             android:paddingBottom="4dp">
 
             <com.like.LikeButton
+                app:icon_size="24sp"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 app:unlike_drawable="@drawable/favorite_inactive" />

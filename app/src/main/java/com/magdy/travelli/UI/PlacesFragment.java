@@ -1,34 +1,20 @@
 package com.magdy.travelli.UI;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.magdy.travelli.Adapters.PlaceAdapter;
-import com.magdy.travelli.Data.Constants;
 import com.magdy.travelli.Data.Place;
 import com.magdy.travelli.Data.Tour;
 import com.magdy.travelli.R;
-import com.magdy.travelli.Services.StringRequestNew;
-import com.magdy.travelli.helpers.StaticMembers;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,14 +24,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
-
-import static com.magdy.travelli.helpers.StaticMembers.TOURS;
 
 public class PlacesFragment extends Fragment {
     List<Place> places;
     Tour tour;
-    RequestQueue queue;
     PlaceAdapter adapter;
 
     public static PlacesFragment newInstance(Tour tour) {
@@ -57,9 +39,8 @@ public class PlacesFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.place_tab_in_tour_details, container, false);
-        queue = Volley.newRequestQueue(Objects.requireNonNull(getContext()));
         return view;
-    };
+    }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {

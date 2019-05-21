@@ -55,10 +55,11 @@
 
                     <android.support.v7.widget.AppCompatRatingBar
                         android:id="@+id/ratingBar"
-                        style="@style/smallRatingBar"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:isIndicator="true" />
+                        android:isIndicator="true"
+                        style="@style/smallRatingBar"
+                        android:theme="@style/smallRatingBar"/>
 
                     <TextView
                         android:id="@+id/noOfReviews"
@@ -117,6 +118,7 @@
                 app:circle_end_color="@color/grey"
                 app:circle_start_color="@color/primary_500"
                 app:dots_primary_color="@color/grey"
+                app:icon_size="24dp"
                 app:dots_secondary_color="@color/primary_500"
                 app:like_drawable="@drawable/favorite_active"
                 app:unlike_drawable="@drawable/favorite_inactive" />

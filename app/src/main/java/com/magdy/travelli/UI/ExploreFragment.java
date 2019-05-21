@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -36,17 +35,15 @@ import java.util.Objects;
  * Created by engma on 10/3/2017.
  */
 
-public class ExploreFragment extends Fragment implements OnMapReadyCallback,GoogleMap.OnMarkerClickListener {
+public class ExploreFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
     private GoogleMap mMap;
     List<Place> places;
-    private RequestQueue queue;
-    Map<Marker,String> markerMap ;
+    Map<Marker, String> markerMap;
 
-    static ExploreFragment newInstance()
-    {
+    static ExploreFragment newInstance() {
         ExploreFragment fragment = new ExploreFragment();
         fragment.setArguments(new Bundle());
-        return fragment ;
+        return fragment;
     }
 
     @Override
@@ -58,25 +55,22 @@ public class ExploreFragment extends Fragment implements OnMapReadyCallback,Goog
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 markerMap.clear();
-               double avgLat=0,avgLong=0;
-                for (DataSnapshot snapshot:dataSnapshot.getChildren())
-                {
+                double avgLat = 0, avgLong = 0;
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Place place = snapshot.getValue(Place.class);
-                    if (place!=null)
-                    {
-                        LatLng temp = new LatLng(place.getLat(),place.getLongt());
+                    if (place != null) {
+                        LatLng temp = new LatLng(place.getLat(), place.getLongt());
                         avgLat += temp.latitude;
                         avgLong += temp.longitude;
                         Marker m = mMap.addMarker(new MarkerOptions().position(temp).title(place.getName()));
                         m.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.location_pin));
-                        markerMap.put(m,place.getId());
+                        markerMap.put(m, place.getId());
                     }
                 }
-                if (markerMap.size()>0)
-                {
-                    avgLat/=markerMap.size();
-                    avgLong/=markerMap.size();
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(avgLat,avgLong), 15));
+                if (markerMap.size() > 0) {
+                    avgLat /= markerMap.size();
+                    avgLong /= markerMap.size();
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(avgLat, avgLong), 15));
                     mMap.setOnMarkerClickListener(ExploreFragment.this);
                 }
             }
@@ -88,11 +82,12 @@ public class ExploreFragment extends Fragment implements OnMapReadyCallback,Goog
         });
 
     }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-         super.onCreateView(inflater, container, savedInstanceState);
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.fragment_explore,container,false);
+        super.onCreateView(inflater, container, savedInstanceState);
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.fragment_explore, container, false);
         SupportMapFragment mapFragment = (SupportMapFragment) Objects.requireNonNull(getActivity()).getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -103,7 +98,7 @@ public class ExploreFragment extends Fragment implements OnMapReadyCallback,Goog
     @Override
     public boolean onMarkerClick(Marker marker) {
         String id = markerMap.get(marker);
-        if (id!=null) {
+        if (id != null) {
             Toast.makeText(getContext(), id, Toast.LENGTH_SHORT).show();
             marker.showInfoWindow();
             return true;

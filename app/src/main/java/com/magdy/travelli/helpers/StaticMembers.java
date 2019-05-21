@@ -8,14 +8,13 @@ import android.graphics.Bitmap;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
-import android.text.Html;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.magdy.travelli.R;
@@ -36,6 +35,7 @@ public class StaticMembers {
     public static final String DATE_FORMAT_VIEW = "yyyy-M-dd hh:mm";
     public static final String PLACES = "places";
     public static final String MEDIA_LIST = "media_list";
+    public static final String FAV_TOURS = "fav_tours";
     private static final String LANGUAGE = "language";
     public static final String EMAIL = "email";
     public static final String PASSWORD = "password";
@@ -47,23 +47,17 @@ public class StaticMembers {
 
     ////////////////// change Dots////////////////////
     public static void changeDots(int currentPage, int count, LinearLayout dotsLayout, Context context) {
-        TextView[] dots = new TextView[count];
+        ImageView[] dots = new ImageView[count];
 
         dotsLayout.removeAllViews();
         for (int i = 0; i < dots.length; i++) {
-            dots[i] = new TextView(context);
-            dots[i].setText(Html.fromHtml("&#8226;"));
-            dots[i].setTextSize(35);
-            dots[i].setGravity(View.TEXT_ALIGNMENT_CENTER);
-            dots[i].setTextColor(context.getResources().getColor(R.color.colorAccent));
+            dots[i] = new ImageView(context);
+            dots[i].setImageResource(R.drawable.bullet_unselected);
             dotsLayout.addView(dots[i]);
         }
 
         if (dots.length > currentPage)
-        {
-            dots[currentPage].setTextColor(context.getResources().getColor(R.color.colorPrimary));
-            dots[currentPage].setTextSize(50);
-        }
+            dots[currentPage].setImageResource(R.drawable.bullet_selected);
     }
     /////////////////////////////combine bitmaps///////////////////
     /*

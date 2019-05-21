@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.like.LikeButton;
@@ -26,6 +27,8 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.magdy.travelli.helpers.StaticMembers.FAV_TOURS;
+
 
 public class TourRecyclerAdapter extends RecyclerView.Adapter<TourRecyclerAdapter.ViewHolder> {
     private Context context;
@@ -37,7 +40,7 @@ public class TourRecyclerAdapter extends RecyclerView.Adapter<TourRecyclerAdapte
         this.context = context;
         this.list = tours;
         this.listener = listener;
-        dbRef = FirebaseDatabase.getInstance().getReference(StaticMembers.TOURS);
+        dbRef = FirebaseDatabase.getInstance().getReference();
     }
 
     @NonNull
@@ -58,12 +61,15 @@ public class TourRecyclerAdapter extends RecyclerView.Adapter<TourRecyclerAdapte
         holder.wishList.setOnLikeListener(new OnLikeListener() {
             @Override
             public void liked(LikeButton likeButton) {
-                dbRef.child(tour.getKey()).child(StaticMembers.FAV).setValue(true);
+                if (FirebaseAuth.getInstance().getUid() != null)
+                    dbRef.child(FirebaseAuth.getInstance().getUid()).child(FAV_TOURS).child(tour.getKey()).setValue(1);
             }
 
             @Override
             public void unLiked(LikeButton likeButton) {
-                dbRef.child(tour.getKey()).child(StaticMembers.FAV).setValue(false);
+                if (FirebaseAuth.getInstance().getUid() != null)
+                    dbRef.child(FirebaseAuth.getInstance().getUid()).child(FAV_TOURS).child(tour.getKey()).removeValue();
+
             }
         });
         holder.itemView.setOnClickListener(new View.OnClickListener() {

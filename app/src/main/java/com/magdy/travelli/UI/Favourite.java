@@ -20,17 +20,12 @@ import com.magdy.travelli.R;
 import com.magdy.travelli.TourInfoListener;
 
 import java.util.ArrayList;
-import java.util.Objects;
-
-import io.rmiri.skeleton.Master.IsCanSetAdapterListener;
-import io.rmiri.skeleton.Master.SkeletonConfig;
 
 public class Favourite extends DialogFragment implements TourInfoListener {
     ArrayList<Tour> favs;
     TourRecyclerAdapter adapter;
     RecyclerView favRecycler;
     SwipeRefreshLayout swipeRefreshLayout;
-    SkeletonConfig config;
 
     static Favourite newInstance() {
         Favourite f = new Favourite();
@@ -75,7 +70,6 @@ public class Favourite extends DialogFragment implements TourInfoListener {
             @Override
             public void onRefresh() {
 
-                config.setSkeletonIsOn(true);
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -86,7 +80,6 @@ public class Favourite extends DialogFragment implements TourInfoListener {
             }
         });
         swipeRefreshLayout.setRefreshing(true);
-        config.setSkeletonIsOn(true);
         adapter.notifyDataSetChanged();
 
         new Handler().postDelayed(new Runnable() {

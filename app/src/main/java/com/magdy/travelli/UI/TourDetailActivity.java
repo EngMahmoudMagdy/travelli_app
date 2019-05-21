@@ -29,15 +29,16 @@ import android.view.Gravity;
 import android.view.Surface;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
 import com.asha.vrlib.MD360Director;
 import com.asha.vrlib.MD360DirectorFactory;
 import com.asha.vrlib.MDVRLibrary;
@@ -108,7 +109,6 @@ public class TourDetailActivity extends AppCompatActivity {
     private MDVRLibrary.IImageLoadProvider mImageLoadProvider = new ImageLoadProvider();
 
     boolean isReady = false, isPlaying = false, loadingBool = false, isImage = true;
-    RequestQueue queue;
     ArrayList<Media> mediaList;
     ArrayList<Hotspot> hotspots;
     private List<MDAbsPlugin> plugins;
@@ -129,7 +129,6 @@ public class TourDetailActivity extends AppCompatActivity {
         seekBar = findViewById(R.id.seekbar);
         indicator = findViewById(R.id.indicator);
         mMediaPlayerWrapper = new MediaPlayerWrapper();
-        queue = Volley.newRequestQueue(Objects.requireNonNull(getApplicationContext()));
         plugins = new ArrayList<>();
         textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
@@ -237,9 +236,9 @@ public class TourDetailActivity extends AppCompatActivity {
     MDVRLibrary getmVRLibrary() {
         if (currentMedia != null) {
             if (currentMedia.getType() == 0) {
-                return mVideoLib;
-            } else
                 return mVRLibrary;
+            } else
+                return mVideoLib;
         }
         return mVRLibrary;
     }
@@ -402,7 +401,7 @@ public class TourDetailActivity extends AppCompatActivity {
                 return true;
             }
         });
-        final ImageButton motionMode = findViewById(R.id.motion_mode);
+        final CheckBox motionMode = findViewById(R.id.motion_mode);
         controllers = findViewById(R.id.controllers);
         motionMode.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -415,15 +414,11 @@ public class TourDetailActivity extends AppCompatActivity {
                 return true;
             }
         });
-        motionMode.setOnClickListener(new View.OnClickListener() {
+        motionMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
-                if (getmVRLibrary().getInteractiveMode() == MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH) {
-                    getmVRLibrary().switchInteractiveMode(getBaseContext(), MDVRLibrary.INTERACTIVE_MODE_TOUCH);
-                    motionMode.setImageDrawable(getResources().getDrawable(R.drawable.ic_3d_rotation_black_24dp));
-                } else {
-                    getmVRLibrary().switchInteractiveMode(getBaseContext(), MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH);
-                    motionMode.setImageDrawable(getResources().getDrawable(R.drawable.ic_touch_app_black_24dp));
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (buttonView.isPressed()) {
+                    getmVRLibrary().switchInteractiveMode(getBaseContext(), isChecked ? MDVRLibrary.INTERACTIVE_MODE_TOUCH : MDVRLibrary.INTERACTIVE_MODE_MOTION_WITH_TOUCH);
                 }
             }
         });

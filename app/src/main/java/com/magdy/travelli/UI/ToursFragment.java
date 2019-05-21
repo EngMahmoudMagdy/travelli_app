@@ -12,11 +12,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.facebook.shimmer.ShimmerFrameLayout;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.magdy.travelli.Adapters.TourRecyclerAdapter;
@@ -26,11 +24,14 @@ import com.magdy.travelli.R;
 import com.magdy.travelli.TourInfoListener;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.magdy.travelli.helpers.StaticMembers.FAV_TOURS;
 import static com.magdy.travelli.helpers.StaticMembers.TOURS;
+import static com.magdy.travelli.helpers.StaticMembers.USERS;
 
 
 /**
@@ -84,14 +85,26 @@ public class ToursFragment extends Fragment implements TourInfoListener {
         shimmer.setVisibility(View.VISIBLE);
         tourRecycler.setVisibility(View.INVISIBLE);
         swipeRefreshLayout.setRefreshing(true);
-        FirebaseDatabase.getInstance().getReference(TOURS).addListenerForSingleValueEvent(new ValueEventListener() {
+        FirebaseDatabase.getInstance().getReference().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot root) {
                 tours.clear();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                List<String> fav = new ArrayList<>();
+                DataSnapshot toursSnap = root.child(TOURS);
+                if (FirebaseAuth.getInstance().getUid() != null) {
+                    DataSnapshot user = root.child(USERS).child(FirebaseAuth.getInstance().getUid());
+                    for (DataSnapshot snapshot : user.child(FAV_TOURS).getChildren()) {
+                        fav.add(snapshot.getKey());
+                    }
+                }
+                for (DataSnapshot snapshot : toursSnap.getChildren()) {
                     Tour tour = snapshot.getValue(Tour.class);
                     if (tour != null) {
                         tour.setKey(snapshot.getKey());
+                        for (String favKey : fav) {
+                            if (favKey.equals(tour.getKey()))
+                                tour.setFav(true);
+                        }
                         tours.add(tour);
                     }
                 }
@@ -112,22 +125,6 @@ public class ToursFragment extends Fragment implements TourInfoListener {
         });
     }
 
-
-    void addTour(final int i) {
-        if (!tours.isEmpty() && i < tours.size()) {
-            final Tour tour = tours.get(i);
-            final DatabaseReference dr = FirebaseDatabase.getInstance().getReference(TOURS).push();
-            dr.setValue(tour).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if (task.isSuccessful()) {
-                        tour.setKey(dr.getKey());
-                        addTour(i + 1);
-                    }
-                }
-            });
-        }
-    }
 
     @Override
     public void setSelected(Tour tour) {
