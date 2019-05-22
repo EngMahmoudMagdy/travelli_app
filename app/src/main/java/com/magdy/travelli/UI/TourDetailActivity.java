@@ -37,7 +37,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.asha.vrlib.MD360Director;
 import com.asha.vrlib.MD360DirectorFactory;
@@ -537,6 +536,8 @@ public class TourDetailActivity extends AppCompatActivity {
         toast.show();
     }
 
+    com.bumptech.glide.request.target.Target<Drawable> target2;
+
     void imageStart() {
         loadingBool = true;
         controllers.setVisibility(View.GONE);
@@ -569,13 +570,12 @@ public class TourDetailActivity extends AppCompatActivity {
                     })
                     //.projectionFactory(new CustomProjectionFactory())
                     .build(imageView);
-            imageView.setTag(mTarget);
         } else {
             mVRLibrary.notifyPlayerChanged();
         }
     }
 
-    private void loadImage(String url, final MD360BitmapTexture.Callback callback) {
+    private void loadImage(final String url, final MD360BitmapTexture.Callback callback) {
         Log.d(TAG, "load image with max texture size:" + callback.getMaxTextureSize());
         showBusy();
         if (mediaList.isEmpty()) {
@@ -604,13 +604,42 @@ public class TourDetailActivity extends AppCompatActivity {
             public void onPrepareLoad(Drawable placeHolderDrawable) {
             }
         };
+        Target thumbNailTarget = new Target() {
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                Log.d(TAG, "loaded image, size:" + bitmap.getWidth() + "," + bitmap.getHeight());
+                // notify if size changed
+                getmVRLibrary().onTextureResize(bitmap.getWidth(), bitmap.getHeight());
+                // texture
+                callback.texture(bitmap);
+                cancelBusy();
+                loadingBool = false;
+                Picasso.with(getApplicationContext())
+                        .load(url)
+                        .resize(callback.getMaxTextureSize(), callback.getMaxTextureSize())
+                        .onlyScaleDown()
+                        .centerInside()
+                        .memoryPolicy(NO_CACHE, NO_STORE)
+                        .into(mTarget);
+            }
+
+            @Override
+            public void onBitmapFailed(Drawable errorDrawable) {
+            }
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+            }
+        };
+
         Picasso.with(getApplicationContext())
-                .load(url)
+                .load(currentMedia.getThumbnail())
                 .resize(callback.getMaxTextureSize(), callback.getMaxTextureSize())
                 .onlyScaleDown()
                 .centerInside()
                 .memoryPolicy(NO_CACHE, NO_STORE)
-                .into(mTarget);
+                .into(thumbNailTarget);
+
     }
 
     public void cancelBusy() {

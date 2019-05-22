@@ -53,6 +53,7 @@ import com.magdy.travelli.Data.Hotspot;
 import com.magdy.travelli.Data.Media;
 import com.magdy.travelli.Data.MediaListPackage;
 import com.magdy.travelli.R;
+import com.magdy.travelli.helpers.ImageLoaderHelper;
 import com.magdy.travelli.helpers.StaticMembers;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -353,36 +354,33 @@ public class FullScreenActivity extends AppCompatActivity {
         }
     }
 
-    private void loadImage(String url, final MD360BitmapTexture.Callback callback) {
+    private void loadImage(final String url, final MD360BitmapTexture.Callback callback) {
         Log.d("Full", "load image with max texture size:" + callback.getMaxTextureSize());
         showBusy();
-        mTarget = new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                Log.d("Full", "loaded image, size:" + bitmap.getWidth() + "," + bitmap.getHeight());
-                // notify if size changed
-                mVRLibrary.onTextureResize(bitmap.getWidth(), bitmap.getHeight());
-                // texture
-                callback.texture(bitmap);
-                cancelBusy();
-                loadingBool = false;
-            }
 
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) {
-            }
+        ///////// load thumbnail image //////////
+        ImageLoaderHelper.loadImage(this,
+                callback, currentMedia.getThumbnail(),
+                new ImageLoaderHelper.ImageLoadedListener() {
+                    @Override
+                    public void onImageLoaded(Bitmap bitmap) {
 
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-            }
-        };
-        Picasso.with(getApplicationContext())
-                .load(url)
-                .resize(callback.getMaxTextureSize(), callback.getMaxTextureSize())
-                .onlyScaleDown()
-                .centerInside()
-                .memoryPolicy(NO_CACHE, NO_STORE)
-                .into(mTarget);
+                        mVRLibrary.onTextureResize(bitmap.getWidth(), bitmap.getHeight());
+                        callback.texture(bitmap);
+                        cancelBusy();
+                        loadingBool = false;
+                        ///////// load thumbnail image //////////
+                        ImageLoaderHelper.loadImage(getBaseContext(),
+                                callback, url,
+                                new ImageLoaderHelper.ImageLoadedListener() {
+                                    @Override
+                                    public void onImageLoaded(Bitmap bitmap) {
+                                        mVRLibrary.onTextureResize(bitmap.getWidth(), bitmap.getHeight());
+                                        callback.texture(bitmap);
+                                    }
+                                });
+                    }
+                });
     }
 
     public void showBusy() {

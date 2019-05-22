@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class Media implements Serializable {
     private int type;
-    private String id, name, link, key;
+    private String id, name, link, key,thumbnail;
     private Map<String,Hotspot> hotspots;
 
     public Media() {
@@ -62,5 +62,13 @@ public class Media implements Serializable {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
     }
 }
