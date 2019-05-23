@@ -30,4 +30,5 @@
     <color name="circleProgressCompleteEndGradient">@color/colorPrimaryDark</color>
     <color name="whiteTrans">#aaFFFFFF</color>
     <color name="black">#000</color>
+    <color name="greyDark">#444</color>
 </resources>

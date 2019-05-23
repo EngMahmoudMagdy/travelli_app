@@ -39,6 +39,7 @@ public class StaticMembers {
     public static final String PLACES = "places";
     public static final String MEDIA_LIST = "media_list";
     public static final String FAV_TOURS = "fav_tours";
+    public static final String AUTHORITY = "";
     private static final String LANGUAGE = "language";
     public static final String EMAIL = "email";
     public static final String PASSWORD = "password";

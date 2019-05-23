@@ -67,4 +67,8 @@
     <string name="details">Details</string>
     <string name="places">Places</string>
     <string name="reviews">Reviews</string>
+    <string name="no">No</string>
+    <string name="permission_denied">Permission denied</string>
+    <string name="camera">Camera</string>
+    <string name="gallery">Gallery</string>
 </resources>
