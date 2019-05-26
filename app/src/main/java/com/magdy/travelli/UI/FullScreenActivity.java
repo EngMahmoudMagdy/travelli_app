@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
@@ -114,6 +115,7 @@ public class FullScreenActivity extends AppCompatActivity {
         plugins = new ArrayList<>();
         hotspots = new ArrayList<>();
         mediaList = new ArrayList<>();
+        MediaPlayer player = new MediaPlayer();
         textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
