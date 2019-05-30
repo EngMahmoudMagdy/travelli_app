@@ -71,4 +71,6 @@
     <string name="permission_denied">Permission denied</string>
     <string name="camera">Camera</string>
     <string name="gallery">Gallery</string>
+    <string name="upload_image">Upload image</string>
+    <string name="choose_image">Choose Image</string>
 </resources>

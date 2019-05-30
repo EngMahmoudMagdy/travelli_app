@@ -48,6 +48,7 @@ public class StaticMembers {
     public static final String ADDRESS = "address";
     public static final String TOKEN = "token";
     public static final String PAGE = "page";
+    public static final String NAME = "name";
 
     ////////////////// change Dots////////////////////
     public static void changeDots(int currentPage, int count, LinearLayout dotsLayout, Context context) {
@@ -65,7 +66,7 @@ public class StaticMembers {
     }
 
     public static Bitmap drawableToBitmap(Drawable drawable) {
-        Bitmap bitmap ;
+        Bitmap bitmap;
 
         if (drawable instanceof BitmapDrawable) {
             BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
@@ -94,20 +95,16 @@ canvas.drawBitmap(firstImage, 0f, 0f, null);
 canvas.drawBitmap(secondImage, 10, 10, null);
 return result;*/
 
-    public Bitmap[][] splitBitmap(Bitmap bitmap, int xCount, int yCount) {
+    public static Bitmap[] splitBitmap(Bitmap bitmap, int xCount) {
         // Allocate a two dimensional array to hold the individual images.
-        Bitmap[][] bitmaps = new Bitmap[xCount][yCount];
-        int width, height;
+        Bitmap[] bitmaps = new Bitmap[xCount];
+        int width;
         // Divide the original bitmap width by the desired vertical column count
         width = bitmap.getWidth() / xCount;
         // Divide the original bitmap height by the desired horizontal row count
-        height = bitmap.getHeight() / yCount;
         // Loop the array and create bitmaps for each coordinate
         for (int x = 0; x < xCount; ++x) {
-            for (int y = 0; y < yCount; ++y) {
-                // Create the sliced bitmap
-                bitmaps[x][y] = Bitmap.createBitmap(bitmap, x * width, y * height, width, height);
-            }
+            bitmaps[x] = Bitmap.createBitmap(bitmap, x * width, 0, width, bitmap.getHeight());
         }
         // Return the array
         return bitmaps;

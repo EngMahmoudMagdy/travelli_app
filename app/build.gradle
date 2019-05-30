@@ -68,6 +68,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:18.0.0'
     implementation 'com.google.firebase:firebase-database:17.0.0'
     implementation 'com.google.firebase:firebase-auth:17.0.0'
+    implementation 'com.google.firebase:firebase-storage:17.0.0'
 
     implementation 'com.github.ashqal:MD360Player4Android:2.5.0'
     implementation 'tv.danmaku.ijk.media:ijkplayer-java:0.8.8'
@@ -79,4 +80,5 @@ dependencies {
     implementation 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.8.8'
     implementation 'me.relex:circleindicator:1.2.2@aar'
     testImplementation 'junit:junit:4.12'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
