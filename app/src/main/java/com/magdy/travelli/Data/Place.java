@@ -1,11 +1,12 @@
 package com.magdy.travelli.Data;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 
 public class Place implements Serializable {
     private String key;
-    private List<String> media;
+    private HashMap<String,Integer> media;
     public String getKey() {
         return key;
     }
@@ -14,12 +15,11 @@ public class Place implements Serializable {
         this.key = key;
     }
 
-
-    public List<String> getMedia() {
+    public HashMap<String, Integer> getMedia() {
         return media;
     }
 
-    public void setMedia(List<String> media) {
+    public void setMedia(HashMap<String, Integer> media) {
         this.media = media;
     }
 

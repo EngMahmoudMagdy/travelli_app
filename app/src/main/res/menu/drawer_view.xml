@@ -11,6 +11,10 @@
             android:icon="@drawable/ic_flight_black_24dp"
             android:title="@string/tours" />
         <item
+            android:id="@+id/uploadImage"
+            android:icon="@drawable/ic_flight_black_24dp"
+            android:title="@string/upload_image" />
+        <item
             android:id="@+id/nav_fav"
             android:icon="@drawable/ic_favorite_black_24dp"
             android:title="@string/fav" />

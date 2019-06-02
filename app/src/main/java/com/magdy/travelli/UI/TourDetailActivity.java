@@ -160,7 +160,7 @@ public class TourDetailActivity extends AppCompatActivity {
                     String placeString = placeSnapShot.getValue(String.class);
                     if (placeString != null)
                         for (DataSnapshot mediaSnapShot : root.child(PLACES).child(placeString).child(MEDIA).getChildren()) {
-                            String mediaKey = mediaSnapShot.getValue(String.class);
+                            String mediaKey = mediaSnapShot.getKey();
                             if (mediaKey != null) {
                                 Media media = root.child(MEDIA).child(mediaKey).getValue(Media.class);
                                 if (media != null)

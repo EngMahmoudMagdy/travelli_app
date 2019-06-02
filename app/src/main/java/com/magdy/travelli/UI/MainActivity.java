@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.magdy.travelli.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout mDrawer;
     private Toolbar toolbar;
     private ActionBarDrawerToggle drawerToggle;
-    TextView navName , navEmail;
+    TextView navName, navEmail;
     private ArrayList<String> mCountries;
 
     @Override
@@ -36,19 +37,19 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        toolbar =  findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar); // for toolbar_home
 
-        ViewPager tabPager =  findViewById(R.id.tappager);
+        ViewPager tabPager = findViewById(R.id.tappager);
         setupTapPager(tabPager);
 
-        TabLayout tabLayout =  findViewById(R.id.tabs);
+        TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(tabPager);
         mDrawer = findViewById(R.id.drawer_layout);//layout itself
         NavigationView nvDrawer = findViewById(R.id.nvView);
         View header = nvDrawer.inflateHeaderView(R.layout.nav_header);
-        navEmail =  header.findViewById(R.id.emailtext);
-        navName =  header.findViewById(R.id.uname);
+        navEmail = header.findViewById(R.id.emailtext);
+        navName = header.findViewById(R.id.uname);
 
         mDrawer.addDrawerListener(drawerToggle);
         // Setup drawer view
@@ -58,10 +59,11 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.search).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getBaseContext(),getString(R.string.search),Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), getString(R.string.search), Toast.LENGTH_SHORT).show();
             }
         });
     }
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -75,16 +77,17 @@ public class MainActivity extends AppCompatActivity {
         // Pass any configuration change to the drawer toggles
         drawerToggle.onConfigurationChanged(newConfig);
     }
+
     private ActionBarDrawerToggle setupDrawerToggle() {
         // NOTE: Make sure you pass in a valid toolbar_home reference.  ActionBarDrawToggle() does not require it
         // and will not render the hamburger icon without it.
-        return new ActionBarDrawerToggle(this, mDrawer, toolbar, R.string.navigation_drawer_open,  R.string.navigation_drawer_close)
-        {
+        return new ActionBarDrawerToggle(this, mDrawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
+
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
@@ -92,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
     }
+
     private void setupDrawerContent(NavigationView navigationView) {
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
@@ -102,18 +106,21 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
+
     public void selectDrawerItem(MenuItem menuItem) {
         mDrawer.closeDrawers();
-        if (menuItem.getItemId()==R.id.nav_log)
-        {
-            Intent intent = new Intent(getBaseContext(),SignInActivity.class);
+        if (menuItem.getItemId() == R.id.nav_log) {
+            Intent intent = new Intent(getBaseContext(), SignInActivity.class);
             startActivity(intent);
 
         }
-        if(menuItem.getItemId()==R.id.nav_fav){
-        Favourite fragment = Favourite.newInstance();
-        fragment.show(getFragmentManager(),"favourite");
+        if (menuItem.getItemId() == R.id.nav_fav) {
+            Favourite fragment = Favourite.newInstance();
+            fragment.show(getFragmentManager(), "favourite");
 
+        }
+        if (menuItem.getItemId() == R.id.uploadImage) {
+            startActivity(new Intent(getBaseContext(), Upload360ImageActivity.class));
         }
 //        if(menuItem.getItemId()==R.id.nav_fav)
 //        {
@@ -128,12 +135,13 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }*/
     }
+
     private void setupTapPager(ViewPager TapPager) {
         TapPagerAdapter adapter = new TapPagerAdapter(getSupportFragmentManager());
-        ToursFragment fragment  = ToursFragment.newInstance();
-        adapter.addFragment(fragment,"Tours");
+        ToursFragment fragment = ToursFragment.newInstance();
+        adapter.addFragment(fragment, "Tours");
         ExploreFragment f = ExploreFragment.newInstance();
-        adapter.addFragment(f,"Map");
+        adapter.addFragment(f, "Map");
         TapPager.setAdapter(adapter);
     }
 
@@ -142,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.toolbar_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -153,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case R.id.search:
-               loadToolBarSearch();
+                loadToolBarSearch();
                 break;
         }
 
@@ -188,6 +197,7 @@ public class MainActivity extends AppCompatActivity {
             return mFragmentTitleList.get(position);
         }
     }
+
     public void loadToolBarSearch() {
 /*
         ArrayList<String> countryStored = SharedPreference.loadList(MainActivity.this, Utils.PREFS_NAME, Utils.KEY_COUNTRIES);

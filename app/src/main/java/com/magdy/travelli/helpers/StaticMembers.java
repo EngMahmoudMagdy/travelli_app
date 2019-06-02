@@ -22,6 +22,8 @@ import android.widget.Toast;
 
 import com.magdy.travelli.R;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -49,6 +51,8 @@ public class StaticMembers {
     public static final String TOKEN = "token";
     public static final String PAGE = "page";
     public static final String NAME = "name";
+    @NotNull
+    public static final String PARTS = "parts";
 
     ////////////////// change Dots////////////////////
     public static void changeDots(int currentPage, int count, LinearLayout dotsLayout, Context context) {
