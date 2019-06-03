@@ -74,4 +74,5 @@
     <string name="upload_image">Upload image</string>
     <string name="choose_image">Choose Image</string>
     <string name="retry">Retry</string>
+    <string name="uploading_image">Uploading an image</string>
 </resources>

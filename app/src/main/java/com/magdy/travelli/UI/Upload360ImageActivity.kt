@@ -1,6 +1,7 @@
 package com.magdy.travelli.UI
 
 import android.app.Activity
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -8,6 +9,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.support.design.widget.Snackbar
+import android.support.v4.app.NotificationCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View.GONE
@@ -41,11 +43,14 @@ class Upload360ImageActivity : AppCompatActivity() {
     private lateinit var placesKeys: HashMap<String, String>
     private lateinit var placesNameList: ArrayList<String>
     private lateinit var snackbar: Snackbar
+    private lateinit var notificationManager: NotificationManager
 
     private val TAG = Upload360ImageActivity::class.java.simpleName
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_upload360_image)
+        //Notification manager
+        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         placesKeys = java.util.HashMap()
         placesNameList = ArrayList()
         snackbar = Snackbar.make(coordinator, R.string.connection_error, Snackbar.LENGTH_INDEFINITE)
@@ -64,7 +69,7 @@ class Upload360ImageActivity : AppCompatActivity() {
                 placesNameList.clear()
                 for (i in placesSnapshot.children) {
                     val name = i.child(StaticMembers.NAME).getValue(String::class.java)!!
-                    placesKeys.put(i.key!!, name)
+                    placesKeys.put(name, i.key!!)
                     placesNameList.add(name)
                 }
                 dataAdapter.notifyDataSetChanged()
@@ -97,7 +102,7 @@ class Upload360ImageActivity : AppCompatActivity() {
                 progress.visibility = VISIBLE
                 val bitmaps = StaticMembers.splitBitmap(currentBitmap, 5)
                 val ref = FirebaseDatabase.getInstance().getReference(PLACES)
-                        .child(placesKeys[placesNameList[placesSpinner.selectedItemPosition]]!!)
+                        .child(placesKeys[placesSpinner.selectedItem.toString()]!!)
                         .child(MEDIA).push()
                 ref.setValue(0).addOnCompleteListener {
                     if (it.isSuccessful)
@@ -121,7 +126,7 @@ class Upload360ImageActivity : AppCompatActivity() {
         bitmaps[i].compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
         storage.putBytes(byteArrayOutputStream.toByteArray()).addOnCompleteListener {
             if (it.isSuccessful)
-                if (bitmaps.size > i - 1)
+                if (bitmaps.size > i + 1)
                     uploadBitmap(key, bitmaps, i + 1)
                 else
                     progress.visibility = GONE
@@ -135,6 +140,15 @@ class Upload360ImageActivity : AppCompatActivity() {
                 snackbar.show()
             }
         }
+    }
+
+    fun showNotificationProgress() {
+        val notificationCompat = NotificationCompat.Builder(this, getString(R.string.app_name))
+                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setContentTitle(getString(R.string.uploading_image))
+                .setProgress(500,0,false)
+                .build()
+        notificationManager.notify(111,notificationCompat)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
