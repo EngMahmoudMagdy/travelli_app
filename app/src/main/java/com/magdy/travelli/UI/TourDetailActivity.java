@@ -64,6 +64,7 @@ import com.magdy.travelli.Data.MediaListPackage;
 import com.magdy.travelli.Data.Tour;
 import com.magdy.travelli.R;
 import com.magdy.travelli.Services.VideoDownloadService;
+import com.magdy.travelli.helpers.ImageLoaderHelper;
 import com.magdy.travelli.helpers.StaticMembers;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -157,14 +158,15 @@ public class TourDetailActivity extends AppCompatActivity {
                 DataSnapshot tourSnapshot = root.child(TOURS).child(tour.getKey());
                 mediaList.clear();
                 for (DataSnapshot placeSnapShot : tourSnapshot.child(PLACES).getChildren()) {
-                    String placeString = placeSnapShot.getValue(String.class);
+                    String placeString = placeSnapShot.getKey();
                     if (placeString != null)
                         for (DataSnapshot mediaSnapShot : root.child(PLACES).child(placeString).child(MEDIA).getChildren()) {
                             String mediaKey = mediaSnapShot.getKey();
                             if (mediaKey != null) {
                                 Media media = root.child(MEDIA).child(mediaKey).getValue(Media.class);
-                                if (media != null)
+                                if (media != null) {
                                     mediaList.add(media);
+                                }
                             }
                         }
                 }
@@ -536,8 +538,6 @@ public class TourDetailActivity extends AppCompatActivity {
         toast.show();
     }
 
-    com.bumptech.glide.request.target.Target<Drawable> target2;
-
     void imageStart() {
         loadingBool = true;
         controllers.setVisibility(View.GONE);
@@ -551,8 +551,10 @@ public class TourDetailActivity extends AppCompatActivity {
                     .asBitmap(new MDVRLibrary.IBitmapProvider() {
                         @Override
                         public void onProvideBitmap(final MD360BitmapTexture.Callback callback) {
-                            if (currentMedia != null)
-                                loadImage(currentMedia.getLink(), callback);
+                            Picasso.with(getBaseContext()).cancelTag(MEDIA);
+                            if (currentMedia != null && currentMedia.getParts() != null) {
+                                loadImage(currentMedia.getParts(), callback);
+                            }
                         }
                     })
                     .listenTouchPick(new MDVRLibrary.ITouchPickListener() {
@@ -575,7 +577,74 @@ public class TourDetailActivity extends AppCompatActivity {
         }
     }
 
-    private void loadImage(final String url, final MD360BitmapTexture.Callback callback) {
+    /*
+        private void loadImage(final String url, final MD360BitmapTexture.Callback callback) {
+            Log.d(TAG, "load image with max texture size:" + callback.getMaxTextureSize());
+            showBusy();
+            if (mediaList.isEmpty()) {
+                right.setVisibility(View.INVISIBLE);
+            } else {
+                if (turn < mediaList.size() - 1)
+                    right.setVisibility(View.VISIBLE);
+            }
+            mTarget = new Target() {
+                @Override
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    Log.d(TAG, "loaded image, size:" + bitmap.getWidth() + "," + bitmap.getHeight());
+                    // notify if size changed
+                    getmVRLibrary().onTextureResize(bitmap.getWidth(), bitmap.getHeight());
+                    // texture
+                    callback.texture(bitmap);
+                    cancelBusy();
+                    loadingBool = false;
+                }
+
+                @Override
+                public void onBitmapFailed(Drawable errorDrawable) {
+                }
+
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
+                }
+            };
+            Target thumbNailTarget = new Target() {
+                @Override
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    Log.d(TAG, "loaded image, size:" + bitmap.getWidth() + "," + bitmap.getHeight());
+                    // notify if size changed
+                    getmVRLibrary().onTextureResize(bitmap.getWidth(), bitmap.getHeight());
+                    // texture
+                    callback.texture(bitmap);
+                    cancelBusy();
+                    loadingBool = false;
+                    Picasso.with(getApplicationContext())
+                            .load(url)
+                            .resize(callback.getMaxTextureSize(), callback.getMaxTextureSize())
+                            .onlyScaleDown()
+                            .centerInside()
+                            .memoryPolicy(NO_CACHE, NO_STORE)
+                            .into(mTarget);
+                }
+
+                @Override
+                public void onBitmapFailed(Drawable errorDrawable) {
+                }
+
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
+                }
+            };
+
+            Picasso.with(getApplicationContext())
+                    .load(currentMedia.getThumbnail())
+                    .resize(callback.getMaxTextureSize(), callback.getMaxTextureSize())
+                    .onlyScaleDown()
+                    .centerInside()
+                    .memoryPolicy(NO_CACHE, NO_STORE)
+                    .into(thumbNailTarget);
+
+        }*/
+    private void loadImage(final List<String> urls, final MD360BitmapTexture.Callback callback) {
         Log.d(TAG, "load image with max texture size:" + callback.getMaxTextureSize());
         showBusy();
         if (mediaList.isEmpty()) {
@@ -584,61 +653,21 @@ public class TourDetailActivity extends AppCompatActivity {
             if (turn < mediaList.size() - 1)
                 right.setVisibility(View.VISIBLE);
         }
-        mTarget = new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                Log.d(TAG, "loaded image, size:" + bitmap.getWidth() + "," + bitmap.getHeight());
-                // notify if size changed
-                getmVRLibrary().onTextureResize(bitmap.getWidth(), bitmap.getHeight());
-                // texture
-                callback.texture(bitmap);
-                cancelBusy();
-                loadingBool = false;
-            }
+        ImageLoaderHelper.loadImageList(this,
+                callback, currentMedia.getThumbnail(), urls,
+                new ImageLoaderHelper.ImageLoadedListener() {
+                    @Override
+                    public void onImageTotalFinished() {
+                        cancelBusy();
+                        loadingBool = false;
+                    }
 
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) {
-            }
-
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-            }
-        };
-        Target thumbNailTarget = new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                Log.d(TAG, "loaded image, size:" + bitmap.getWidth() + "," + bitmap.getHeight());
-                // notify if size changed
-                getmVRLibrary().onTextureResize(bitmap.getWidth(), bitmap.getHeight());
-                // texture
-                callback.texture(bitmap);
-                cancelBusy();
-                loadingBool = false;
-                Picasso.with(getApplicationContext())
-                        .load(url)
-                        .resize(callback.getMaxTextureSize(), callback.getMaxTextureSize())
-                        .onlyScaleDown()
-                        .centerInside()
-                        .memoryPolicy(NO_CACHE, NO_STORE)
-                        .into(mTarget);
-            }
-
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) {
-            }
-
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-            }
-        };
-
-        Picasso.with(getApplicationContext())
-                .load(currentMedia.getThumbnail())
-                .resize(callback.getMaxTextureSize(), callback.getMaxTextureSize())
-                .onlyScaleDown()
-                .centerInside()
-                .memoryPolicy(NO_CACHE, NO_STORE)
-                .into(thumbNailTarget);
+                    @Override
+                    public void onImageLoaded(Bitmap bitmap) {
+                        mVRLibrary.onTextureResize(bitmap.getWidth(), bitmap.getHeight());
+                        callback.texture(bitmap);
+                    }
+                });
 
     }
 

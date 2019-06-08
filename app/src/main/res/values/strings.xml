@@ -75,4 +75,7 @@
     <string name="choose_image">Choose Image</string>
     <string name="retry">Retry</string>
     <string name="uploading_image">Uploading an image</string>
+    <string name="upload_finished">Upload finished</string>
+    <string name="upload_failed">Upload failed!</string>
+    <string name="show_slices">Show slices</string>
 </resources>

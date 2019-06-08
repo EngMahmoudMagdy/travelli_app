@@ -53,6 +53,10 @@ public class StaticMembers {
     public static final String NAME = "name";
     @NotNull
     public static final String PARTS = "parts";
+    @NotNull
+    public static final String THUMBNAIL = "thumbnail";
+    @NotNull
+    public static final String TYPE = "type";
 
     ////////////////// change Dots////////////////////
     public static void changeDots(int currentPage, int count, LinearLayout dotsLayout, Context context) {
@@ -90,14 +94,26 @@ public class StaticMembers {
         drawable.draw(canvas);
         return bitmap;
     }
+
     /////////////////////////////combine bitmaps///////////////////
-    /*
-    *
-Bitmap result = Bitmap.createBitmap(firstImage.getWidth(), firstImage.getHeight(), firstImage.getConfig());
-Canvas canvas = new Canvas(result);
-canvas.drawBitmap(firstImage, 0f, 0f, null);
-canvas.drawBitmap(secondImage, 10, 10, null);
-return result;*/
+    public static Bitmap makeThumbnailBig(Bitmap bigBitmap, int sliceHeight) {
+        float ratio = ((float) sliceHeight) / bigBitmap.getHeight();
+        return Bitmap.createScaledBitmap(bigBitmap,
+                (int) (ratio * bigBitmap.getWidth()), (int) (ratio * bigBitmap.getHeight()),
+                false);
+
+    }
+
+    public static Bitmap makeThumbnail(Bitmap bigBitmap) {
+        float q = (bigBitmap.getHeight() > 250) ? (250.0f / bigBitmap.getWidth()) : bigBitmap.getHeight();
+        return Bitmap.createScaledBitmap(bigBitmap, (int) (q * bigBitmap.getWidth()), (int) (q * bigBitmap.getHeight()), false);
+    }
+
+    public static Bitmap compineBitmap(Bitmap bigBitmap, Bitmap smallBitmap, int left) {
+        Canvas canvas = new Canvas(bigBitmap);
+        canvas.drawBitmap(smallBitmap, left, 0, null);
+        return bigBitmap;
+    }
 
     public static Bitmap[] splitBitmap(Bitmap bitmap, int xCount) {
         // Allocate a two dimensional array to hold the individual images.
@@ -108,7 +124,9 @@ return result;*/
         // Divide the original bitmap height by the desired horizontal row count
         // Loop the array and create bitmaps for each coordinate
         for (int x = 0; x < xCount; ++x) {
-            bitmaps[x] = Bitmap.createBitmap(bitmap, x * width, 0, width, bitmap.getHeight());
+            int xt = x * width;
+            int wt = (x == 4) ? (bitmap.getWidth() - 4 * width) : width;
+            bitmaps[x] = Bitmap.createBitmap(bitmap, xt, 0, wt, bitmap.getHeight());
         }
         // Return the array
         return bitmaps;

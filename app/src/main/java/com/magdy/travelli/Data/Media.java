@@ -2,16 +2,28 @@ package com.magdy.travelli.Data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public class Media implements Serializable {
     private int type;
-    private String id, name, link, key,thumbnail;
-    private Map<String,Hotspot> hotspots;
+    private String id, name, link, key, thumbnail;
+    private Map<String, Hotspot> hotspots;
+    private List<String> parts;
 
     public Media() {
+    }
+
+    public void setHotspots(Map<String, Hotspot> hotspots) {
+        this.hotspots = hotspots;
+    }
+
+    public List<String> getParts() {
+        return parts;
+    }
+
+    public void setParts(List<String> parts) {
+        this.parts = parts;
     }
 
     public void setName(String name) {
@@ -48,10 +60,10 @@ public class Media implements Serializable {
 
     public List<Hotspot> getHotspots() {
         List<Hotspot> hotspotList = new ArrayList<>();
-        for (Map.Entry<String,Hotspot> entry : hotspots.entrySet())
-        {
-            hotspotList.add(entry.getValue());
-        }
+        if (hotspots != null)
+            for (Map.Entry<String, Hotspot> entry : hotspots.entrySet()) {
+                hotspotList.add(entry.getValue());
+            }
         return hotspotList;
 
     }
