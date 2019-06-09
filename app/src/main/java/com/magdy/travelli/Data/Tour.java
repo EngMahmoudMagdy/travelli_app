@@ -1,6 +1,7 @@
 package com.magdy.travelli.Data;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -12,7 +13,7 @@ public class Tour implements Serializable {
     private int price, reviewers;
     private float rate;
     private boolean fav;
-    private List<String> places;
+    private HashMap<String,Integer> places;
 
     public Tour() {
     }
@@ -31,11 +32,11 @@ public class Tour implements Serializable {
         this.to = to;
     }
 
-    public List<String> getPlaces() {
+    public HashMap<String, Integer> getPlaces() {
         return places;
     }
 
-    public void setPlaces(List<String> places) {
+    public void setPlaces(HashMap<String, Integer> places) {
         this.places = places;
     }
 

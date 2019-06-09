@@ -333,8 +333,8 @@ public class FullScreenActivity extends AppCompatActivity {
                     .asBitmap(new MDVRLibrary.IBitmapProvider() {
                         @Override
                         public void onProvideBitmap(final MD360BitmapTexture.Callback callback) {
-                            if (currentMedia != null)
-                                loadImage(currentMedia.getLink(), callback);
+                            if (currentMedia != null && currentMedia.getParts() != null)
+                                loadImage(currentMedia.getParts(), callback);
                         }
                     })
                     .listenTouchPick(new MDVRLibrary.ITouchPickListener() {
@@ -356,7 +356,7 @@ public class FullScreenActivity extends AppCompatActivity {
         }
     }
 
-    private void loadImage(final String url, final MD360BitmapTexture.Callback callback) {
+    /*private void loadImage(final String url, final MD360BitmapTexture.Callback callback) {
         Log.d("Full", "load image with max texture size:" + callback.getMaxTextureSize());
         showBusy();
 
@@ -381,6 +381,27 @@ public class FullScreenActivity extends AppCompatActivity {
                                         callback.texture(bitmap);
                                     }
                                 });
+                    }
+                });
+    } */
+    private void loadImage(final List<String> urls, final MD360BitmapTexture.Callback callback) {
+        Log.d("Full", "load image with max texture size:" + callback.getMaxTextureSize());
+        showBusy();
+
+        ///////// load image //////////
+        ImageLoaderHelper.loadImageList(this,
+                callback, currentMedia.getThumbnail(), urls,
+                new ImageLoaderHelper.ImageLoadedListener() {
+                    @Override
+                    public void onImageTotalFinished() {
+                        cancelBusy();
+                        loadingBool = false;
+                    }
+
+                    @Override
+                    public void onImageLoaded(Bitmap bitmap) {
+                        mVRLibrary.onTextureResize(bitmap.getWidth(), bitmap.getHeight());
+                        callback.texture(bitmap);
                     }
                 });
     }
@@ -701,6 +722,7 @@ public class FullScreenActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putLong(Constants.SEEK, getPlayer().getCurrentPosition());
+        if (getPlayer() != null)
+            outState.putLong(Constants.SEEK, getPlayer().getCurrentPosition());
     }
 }
