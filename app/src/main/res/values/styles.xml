@@ -106,4 +106,10 @@
     </style>
 
 
+    <style name="MyProgressBar" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">
+        <item name="android:progressBackgroundTint">@color/grey</item>
+        <item name="android:progressTint">@color/colorPrimary</item>
+        <item name="android:minWidth">200dp</item>
+    </style>
+
 </resources>

@@ -269,10 +269,6 @@ class Upload360ImageActivity : AppCompatActivity() {
                 } while (currSize >= limit)
 
                 currentBitmap = BitmapFactory.decodeStream(ByteArrayInputStream(out.toByteArray()))
-                /* val ratio = (4080.0f / currentBitmap!!.width)
-                 currentBitmap = Bitmap.createScaledBitmap(currentBitmap!!,
-                         (ratio * currentBitmap!!.width).toInt(),
-                         (ratio * currentBitmap!!.height).toInt(), false)*/
             }
             mVRLibrary.notifyPlayerChanged()
         }

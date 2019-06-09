@@ -77,7 +77,7 @@ public abstract class ImageAttachmentManager<T extends Activity, Image extends I
         Options = new Dialog(activity);
         Options.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Options.setCancelable(false);
-        Options.setContentView(R.layout.sucess);
+        Options.setContentView(R.layout.options_linear);
         if (Options.getWindow() != null)
             Options.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
