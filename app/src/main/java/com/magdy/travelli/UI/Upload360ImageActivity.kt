@@ -266,7 +266,7 @@ class Upload360ImageActivity : AppCompatActivity() {
                     // limit quality by 5 percent every time
                     currQuality -= 5
 
-                } while (currSize >= limit)
+                } while (currSize >= limit && currQuality > 5)
 
                 currentBitmap = BitmapFactory.decodeStream(ByteArrayInputStream(out.toByteArray()))
             }
