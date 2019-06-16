@@ -2,6 +2,7 @@ package com.magdy.travelli.Data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,10 +13,6 @@ public class Media implements Serializable {
     private List<String> parts;
 
     public Media() {
-    }
-
-    public void setHotspots(Map<String, Hotspot> hotspots) {
-        this.hotspots = hotspots;
     }
 
     public List<String> getParts() {
@@ -57,16 +54,22 @@ public class Media implements Serializable {
     public String getName() {
         return name;
     }
-
     public List<Hotspot> getHotspots() {
-        List<Hotspot> hotspotList = new ArrayList<>();
-        if (hotspots != null)
-            for (Map.Entry<String, Hotspot> entry : hotspots.entrySet()) {
-                hotspotList.add(entry.getValue());
-            }
-        return hotspotList;
-
+        if (hotspots == null)
+            hotspots = new HashMap<>();
+        List<Hotspot> list = new ArrayList<>();
+        for (Map.Entry<String, Hotspot> entry : hotspots.entrySet()) {
+            Hotspot hotspot = entry.getValue();
+            hotspot.setKey(entry.getKey());
+            list.add(hotspot);
+        }
+        return list;
     }
+
+    public void setHotspots(HashMap<String, Hotspot> hotspots) {
+        this.hotspots = hotspots;
+    }
+
 
     public String getKey() {
         return key;
@@ -82,5 +85,14 @@ public class Media implements Serializable {
 
     public void setThumbnail(String thumbnail) {
         this.thumbnail = thumbnail;
+    }
+
+
+    public void removeHotspot(Hotspot hotspot) {
+        hotspots.remove(hotspot.getKey());
+    }
+
+    public void addHotspot(Hotspot hotspot) {
+        hotspots.put(hotspot.getKey(), hotspot);
     }
 }

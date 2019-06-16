@@ -6,23 +6,25 @@ import android.os.Parcelable;
 import java.io.Serializable;
 
 public class Hotspot implements Serializable {
-    private String id, text, key;
+    private String  text, key,media_id;
     private double yaw, pitch;
     private int type;
 
     public Hotspot() {
     }
 
-    public Hotspot(String id, String text, double yaw, double pitch, int type) {
-        this.id = id;
-        this.text = text;
+    public Hotspot(double yaw, double pitch, int type) {
         this.yaw = yaw;
         this.pitch = pitch;
         this.type = type;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public String getMediaId() {
+        return media_id;
+    }
+
+    public void setMediaId(String media_id) {
+        this.media_id = media_id;
     }
 
     public void setPitch(double pitch) {
@@ -39,10 +41,6 @@ public class Hotspot implements Serializable {
 
     public void setYaw(double yaw) {
         this.yaw = yaw;
-    }
-
-    public String getId() {
-        return id;
     }
 
     public int getType() {
